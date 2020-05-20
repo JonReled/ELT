@@ -1,26 +1,28 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import './semantic/dist/semantic.css';
+import { Tab } from 'semantic-ui-react'
+import Stats from './StatsTab/Stats';
+import Settings from './SettingsTab/Settings';
+import Logs from './LogsTab/Logs';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const panes = [
+  {
+    menuItem: 'Stats',
+    render: () => <Tab.Pane attached={false}><Stats /></Tab.Pane>,
+  },
+  {
+    menuItem: 'Logs',
+    render: () => <Tab.Pane attached={false}><Logs /></Tab.Pane>,
+  },
+  {
+    menuItem: 'Settings',
+    render: () => <Tab.Pane attached={false}><Settings /></Tab.Pane>,
+  },
+]
 
-export default App;
+const TabExampleSecondaryPointing = () => (
+  <Tab menu={{ secondary: true, pointing: true }} panes={panes} />
+)
+
+export default TabExampleSecondaryPointing
