@@ -1,20 +1,18 @@
 import React from 'react';
-import '../semantic/dist/semantic.css';
 import { Checkbox, Button } from 'semantic-ui-react'
-import '../index.css';
 
 let userSettings = {
     weightUnit: 'kg',
     heightUnit: 'cm'
 }
 
-export const WeightUnitToggleSwitch = () => {
+export function WeightUnitToggleSwitch() {
     return(
         <Checkbox toggle onChange={(event, data) => data.checked ? userSettings.weightUnit = 'lb' : userSettings.weightUnit = 'kg'} defaultChecked={localStorage.getItem('weightUnit') === 'lb'} />
     )
 }
 
-export const HeightUnitToggleSwitch = () => {
+export function HeightUnitToggleSwitch() {
     return(
         <Checkbox toggle onChange={(event, data) => data.checked ? userSettings.heightUnit = 'ft' : userSettings.heightUnit = 'cm'} defaultChecked={localStorage.getItem('heightUnit') === 'ft'} />
     )

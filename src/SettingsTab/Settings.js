@@ -1,9 +1,7 @@
 import React from 'react';
-import '../semantic/dist/semantic.css';
 import {WeightUnitToggleSwitch, HeightUnitToggleSwitch, SaveSettingsButton} from './SettingFunctionality.js';
-import '../index.css';
 
-const Settings = () => {
+function Settings() {
     return(
         <div>
             <div className="setting">

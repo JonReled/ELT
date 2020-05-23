@@ -1,6 +1,5 @@
 import React from 'react';
 import './App.css';
-import './semantic/dist/semantic.css';
 import { Tab } from 'semantic-ui-react'
 import Stats from './StatsTab/Stats';
 import Settings from './SettingsTab/Settings';
