@@ -20,8 +20,10 @@ const panes = [
   },
 ]
 
-const TabExampleSecondaryPointing = () => (
-  <Tab menu={{ secondary: true, pointing: true }} panes={panes} />
-)
+function TabExampleSecondaryPointing() {
+  return(
+      <Tab menu={{ secondary: true, pointing: true }} panes={panes} />
+  )
+}
 
 export default TabExampleSecondaryPointing

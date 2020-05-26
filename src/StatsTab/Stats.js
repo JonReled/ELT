@@ -1,7 +1,6 @@
 import React from 'react';
 
 function Stats() {
-
     return(
         <div>
             <h1>Bench:</h1>

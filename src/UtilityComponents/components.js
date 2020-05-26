@@ -7,7 +7,7 @@ export function NumericOnlyInput(props) {
 
     function updateAndCheckIfNumber(userInput) {
         setError(isNaN(userInput))
-        props.sendPropsToParent(userInput, props.placeholder);
+        props.handleChange(parseInt(userInput), props.placeholder);
     }
 
     return(
