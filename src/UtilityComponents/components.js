@@ -11,6 +11,6 @@ export function NumericOnlyInput(props) {
     }
 
     return(
-        <Input error={error} onChange={(event, data) => updateAndCheckIfNumber(data.value)} placeholder={props.placeholder} />
+        <Input style={{marginRight: '5px'}} error={error} onChange={(event, data) => updateAndCheckIfNumber(data.value)} placeholder={props.placeholder} />
     )
 }

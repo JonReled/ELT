@@ -8,9 +8,28 @@ export function retrieveExerciseDatabase() {
    return (JSON.parse(localStorage.getItem('exerciseDatabase')));
 }
 
-export function addLogToDatabase(exerciseLog) {
+export function addLogToDatabase(exerciseLog, day) {
     let currentLog = JSON.parse(localStorage.getItem('logDatabase'));
-    currentLog.push(exerciseLog);
+    currentLog[day] = exerciseLog;
     localStorage.setItem('logDatabase', JSON.stringify(currentLog))
-    console.log(localStorage)
-} 
+}
+
+export function removeLogFromDatabase(day) {
+    let currentLog = JSON.parse(localStorage.getItem('logDatabase'));
+    delete currentLog[day];
+    localStorage.setItem('logDatabase', JSON.stringify(currentLog));
+}
+
+export function retrieveLogDatabase() {
+    return (JSON.parse(localStorage.getItem('logDatabase')));
+ }
+
+ export function updateUserSettingsDatabase(settingName, value) {
+    let currentSettings = JSON.parse(localStorage.getItem('userSettings'));
+    currentSettings[settingName] = value;
+    localStorage.setItem('userSettings', JSON.stringify(currentSettings));
+ }
+
+ export function retrieveUserSettingsDatabase(settingName) {
+     return JSON.parse(localStorage.getItem('userSettings'))[settingName];
+ }
