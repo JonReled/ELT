@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import { Tab } from 'semantic-ui-react'
 import Stats from './StatsTab/Stats';
-import Settings from './SettingsTab/Settings';
+import { Settings } from './SettingsTab/Settings';
 import Logs from './LogsTab/Logs';
 
 const panes = [
@@ -22,7 +22,9 @@ const panes = [
 
 function TabExampleSecondaryPointing() {
   return(
+    <div>
       <Tab menu={{ secondary: true, pointing: true }} panes={panes} />
+    </div>
   )
 }
 

@@ -22,6 +22,7 @@ export function removeLogFromDatabase(day) {
 
 export function retrieveLogDatabase() {
     return (JSON.parse(localStorage.getItem('logDatabase')));
+    
  }
 
  export function updateUserSettingsDatabase(settingName, value) {
@@ -32,4 +33,14 @@ export function retrieveLogDatabase() {
 
  export function retrieveUserSettingsDatabase(settingName) {
      return JSON.parse(localStorage.getItem('userSettings'))[settingName];
+ }
+
+ export function retrieveUserPR() {
+     return JSON.parse(localStorage.getItem('userPRs'));
+ }
+
+ export function updateUserPR(exerciseName, value, type) {
+     let currentPRs = JSON.parse(localStorage.getItem('userPRs'));
+     currentPRs[exerciseName][type] = value;
+     localStorage.setItem('userPRs', JSON.stringify(currentPRs));
  }

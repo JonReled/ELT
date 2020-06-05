@@ -4,14 +4,17 @@ import './index.css';
 import './semantic/dist/semantic.css';
 import TabExampleSecondaryPointing from './App';
 import * as serviceWorker from './serviceWorker';
-import { LogStatsContext } from './Context.js';
+import { LogStatsContext, ClickedDayContext } from './Context.js';
 
 function App() {
   const LogStatsHook = useState({});
+  const ClickedDayHook = useState(new Date());
 
   return(
     <LogStatsContext.Provider value={LogStatsHook}>
-      <TabExampleSecondaryPointing />
+      <ClickedDayContext.Provider value={ClickedDayHook}>
+        <TabExampleSecondaryPointing />
+      </ClickedDayContext.Provider>
     </LogStatsContext.Provider>
   )
 }
