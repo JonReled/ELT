@@ -26,7 +26,6 @@ function Logs(props) {
 
   function changeDayBackgroundIfFuture(date, view) {
     const isInFuture = moment().isBefore(date);
-    console.log(isInFuture)
 
     if (view === 'month' && isInFuture) {
       return 'dayInFuture';
@@ -46,6 +45,10 @@ function LogScreenButtons(props) {
   const [clickedDay] = useContext(ClickedDayContext);
   let dayHasLog = retrieveLogDatabase().hasOwnProperty(moment(clickedDay).format('DD MM YYYY'));
   let isInFuture = moment(clickedDay).isAfter();
+
+  useEffect(() => {
+    console.log('aa')
+  }, [dayHasLog])
 
   if (isInFuture) {
     return <div></div>;
@@ -73,11 +76,13 @@ function LogScreenCreate(props) {
   const [isDisplayed, setIsDisplayed] = useState('flex');
   const [logStats, setLogStats] = useContext(LogStatsContext);
   const [clickedDay] = useContext(ClickedDayContext);
+  const [warningMessage, setWarningMessage] = useState();
 
   function addExercise() {
-      setDisplayedExercises(displayedExercises.concat(exerciseToAdd));
-      setExerciseIndex(exerciseIndex + 1);
-      setLogStats({...logStats, [exerciseIndex]: {exerciseName: '', Sets: '', Reps: '', Weight: ''}})
+    setWarningMessage()
+    setDisplayedExercises(displayedExercises.concat(exerciseToAdd));
+    setExerciseIndex(exerciseIndex + 1);
+    setLogStats({...logStats, [exerciseIndex]: {exerciseName: '', Sets: '', Reps: '', Weight: ''}})
   }
 
   useEffect(() => {
@@ -89,8 +94,43 @@ function LogScreenCreate(props) {
   }
 
   function handleSubmit(event) {
-    addLogToDatabase(logStats, moment(clickedDay).format('DD MM YYYY'));
-    setIsDisplayed('none')
+    let allInputsFilled = true;
+    let allInputsNumber = true;
+    let logStatsArray = Object.entries(logStats);
+
+    for (let i = 0; i < logStatsArray.length; i++) {
+      let exercise = Object.entries(logStatsArray[i][1])
+
+      for (let j = 1; j < exercise.length; j++) {
+        let exerciseData = exercise[j];
+
+        if (isNaN(exerciseData[1]) || exerciseData[1] < 0) {
+          allInputsNumber = false;
+
+        } else if (!exerciseData[1]) {
+          allInputsFilled = false;
+
+        }
+
+      }
+
+    }
+
+    if (Object.keys(logStats).length === 0) {
+      setWarningMessage(<h2 style={{color: 'red'}}>Please enter an exercise.</h2>);
+
+    } else if (!allInputsFilled) {
+      setWarningMessage(<h2 style={{color: 'red'}}>Please fill in all input boxes.</h2>);
+
+    } else if (!allInputsNumber) {
+      setWarningMessage(<h2 style={{color: 'red'}}>Only numeric inputs that are greater than zero are allowed.</h2>);
+
+    } else {
+      addLogToDatabase(logStats, moment(clickedDay).format('DD MM YYYY'));
+      setIsDisplayed('none')
+
+    }
+
   }
 
   return (
@@ -111,6 +151,7 @@ function LogScreenCreate(props) {
             <Button onClick={addExercise}>Add exercise</Button>
             <Button primary onClick={(event) => handleSubmit(event)}>Submit</Button>
           </div>
+          {warningMessage}
       </div>
   )
   
@@ -155,7 +196,6 @@ function LogScreenRemove(props) {
 function ExerciseRow(props) {
   const [logStats] = useContext(LogStatsContext);
   logStats[props.exerciseIndex].exerciseName = props.exerciseName;
-  console.log(logStats)
 
   function addExerciseToContext(value, placeholder) {
       logStats[props.exerciseIndex][placeholder] = value;
