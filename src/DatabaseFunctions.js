@@ -1,3 +1,25 @@
+export function setUpDatabase() {
+    const defaultExerciseDatabase = [{value: 'Bench', text: 'Bench'}, {value: 'Deadlift', text: 'Deadlift'}, {value: 'Squat', text: 'Squat'}];
+    const defaultLogDatabase = {};
+    const defaultUserSettings = {
+    weightUnit: 'kg',
+    heightUnit: 'cm'
+    }
+    const defaultUserPRs = {
+    Bench: {tested1RM: 0, estimated1RM: 0},
+    Deadlift: {tested1RM: 0, estimated1RM: 0},
+    Squat: {tested1RM: 0, estimated1RM: 0},
+    Total: {tested1RM: 0, estimated1RM: 0}
+    }
+
+    if (localStorage.length === 0) {
+        localStorage.setItem('exerciseDatabase', JSON.stringify(defaultExerciseDatabase));
+        localStorage.setItem('logDatabase', JSON.stringify(defaultLogDatabase));
+        localStorage.setItem('userSettings', JSON.stringify(defaultUserSettings));
+        localStorage.setItem('userPRs', JSON.stringify(defaultUserPRs));
+      }
+}
+
 export function addExerciseToDatabase(exerciseName) {
     let currentDatabase = JSON.parse(localStorage.getItem('exerciseDatabase'));
     currentDatabase.push({value: exerciseName, text: exerciseName});

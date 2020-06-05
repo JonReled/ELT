@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { retrieveLogDatabase, retrieveUserPR, updateUserPR } from '../DatabaseFunctions';
+import { retrieveLogDatabase, retrieveUserPR, updateUserPR } from './DatabaseFunctions';
 import { Header, Table, Button } from 'semantic-ui-react';
-import { defaultUserPRs } from '../SettingsTab/Settings';
+
+const defaultUserPRs = {
+  Bench: {tested1RM: 0, estimated1RM: 0},
+  Deadlift: {tested1RM: 0, estimated1RM: 0},
+  Squat: {tested1RM: 0, estimated1RM: 0},
+  Total: {tested1RM: 0, estimated1RM: 0}
+  }
 
 function Stats() {
   const [tableRows, setTableRows] = useState([]);
@@ -53,10 +59,9 @@ function Stats() {
   }
 
   return(
-    <div>
-      <h1>Total:</h1>
-      <Button onClick={calculateOneRM}>Calculate 1RM</Button>
+    <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
       <LogTable tableRows={tableRows}/>
+      <Button style={{margin: '0'}} onClick={calculateOneRM}>Calculate 1RM</Button>
     </div>
   )
 }
@@ -65,12 +70,12 @@ export default Stats;
 
 function LogTable(props) {
   return (
-    <Table celled padded>
+    <Table celled padded style={{width: '80vw'}}>
       <Table.Header>
-        <Table.Row>
-          <Table.HeaderCell>Exercise</Table.HeaderCell>
-          <Table.HeaderCell>Tested 1RM</Table.HeaderCell>
-          <Table.HeaderCell>Estimated 1RM</Table.HeaderCell>
+        <Table.Row style={{textAlign: 'center', fontSize: '1.5rem'}}>
+          <Table.HeaderCell style={{width: '33%'}}>Exercise</Table.HeaderCell>
+          <Table.HeaderCell style={{width: '33%'}}>Tested 1RM</Table.HeaderCell>
+          <Table.HeaderCell style={{width: '33%'}}>Estimated 1RM</Table.HeaderCell>
         </Table.Row>
       </Table.Header>
   

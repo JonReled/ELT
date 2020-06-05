@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import '../index.css';
 import { Input } from 'semantic-ui-react'
 
 export function NumericOnlyInput(props) {

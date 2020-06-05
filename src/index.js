@@ -5,8 +5,11 @@ import './semantic/dist/semantic.css';
 import TabExampleSecondaryPointing from './App';
 import * as serviceWorker from './serviceWorker';
 import { LogStatsContext, ClickedDayContext } from './Context.js';
+import { setUpDatabase } from './DatabaseFunctions'
+
 
 function App() {
+  setUpDatabase();
   const LogStatsHook = useState({});
   const ClickedDayHook = useState(new Date());
 

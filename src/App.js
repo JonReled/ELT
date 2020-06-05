@@ -1,9 +1,9 @@
 import React from 'react';
 import './App.css';
 import { Tab } from 'semantic-ui-react'
-import Stats from './StatsTab/Stats';
-import { Settings } from './SettingsTab/Settings';
-import Logs from './LogsTab/Logs';
+import Stats from './Stats';
+import { Settings } from './Settings';
+import Logs from './Logs';
 
 const panes = [
   {
