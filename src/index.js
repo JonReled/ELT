@@ -4,7 +4,7 @@ import './index.css';
 import './semantic/dist/semantic.css';
 import TabExampleSecondaryPointing from './App';
 import * as serviceWorker from './serviceWorker';
-import { LogStatsContext, ClickedDayContext } from './Context.js';
+import { LogStatsContext, ClickedDayContext, StandardTypeContext } from './Context.js';
 import { setUpDatabase } from './DatabaseFunctions'
 
 
@@ -12,11 +12,14 @@ function App() {
   setUpDatabase();
   const LogStatsHook = useState({});
   const ClickedDayHook = useState(new Date());
+  const StandardTypeHook = useState('Estimated Level');
 
   return(
     <LogStatsContext.Provider value={LogStatsHook}>
       <ClickedDayContext.Provider value={ClickedDayHook}>
-        <TabExampleSecondaryPointing />
+        <StandardTypeContext.Provider value={StandardTypeHook}>
+          <TabExampleSecondaryPointing />
+        </StandardTypeContext.Provider>
       </ClickedDayContext.Provider>
     </LogStatsContext.Provider>
   )

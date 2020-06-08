@@ -1,15 +1,15 @@
 import React from 'react';
-import { Checkbox } from 'semantic-ui-react';
+import { Checkbox, Label } from 'semantic-ui-react';
 import { retrieveUserSettingsDatabase, updateUserSettingsDatabase} from './DatabaseFunctions';
 
 export function Settings() {
     return(
         <div>
             <div className="setting">
-                <span className="settingLabel">Kg</span><WeightUnitToggleSwitch /><span className="settingLabel">Lb</span>
+                <CustomLabel direction={"right"} content={"Kg"}/><WeightUnitToggleSwitch /><CustomLabel direction={"left"} content={"Lb"}/>
             </div>
             <div className="setting">
-                <span className="settingLabel">Cm</span><HeightUnitToggleSwitch /><span className="settingLabel">Ft</span>
+                <CustomLabel direction={"right"} content={"Cm"}/><HeightUnitToggleSwitch /><CustomLabel direction={"left"} content={"Ft"}/>
             </div>
         </div>
     )
@@ -24,5 +24,11 @@ function WeightUnitToggleSwitch() {
 function HeightUnitToggleSwitch() {
     return(
         <Checkbox toggle onChange={(event, data) => data.checked ? updateUserSettingsDatabase('heightUnit', 'ft') : updateUserSettingsDatabase('heightUnit', 'cm')} defaultChecked={retrieveUserSettingsDatabase('heightUnit') === 'ft'} />
+    )
+}
+
+function CustomLabel(props) {
+    return(
+        <Label className="settingLabel" pointing={props.direction}>{props.content}</Label>
     )
 }

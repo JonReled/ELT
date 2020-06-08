@@ -33,7 +33,7 @@ function Logs(props) {
   }
 
   return(
-    <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+    <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
       <Calendar onClickDay={handleClickDay} tileClassName={({ activeStartDate, date, view }) => [changeDayBackgroundIfHasLog(date, view), changeDayBackgroundIfFuture(date, view)]} />
       <LogScreenButtons currentScreen={setcurrentTab} />
       {currentTab}
@@ -134,7 +134,7 @@ function LogScreenCreate(props) {
   }
 
   return (
-      <div style={{display: isDisplayed, flexDirection: 'column', alignItems: 'center'}}>
+      <div style={{display: isDisplayed, flexDirection: 'column', alignItems: 'center', padding: '1rem'}}>
           <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>{displayedExercises}</div>
           <Dropdown
             allowAdditions
@@ -147,7 +147,7 @@ function LogScreenCreate(props) {
             onChange={(_, text) => handleChange(text.value)} 
           />
           <br />
-          <div>
+          <div style={{margin: '3px'}}>
             <Button onClick={addExercise}>Add exercise</Button>
             <Button primary onClick={(event) => handleSubmit(event)}>Submit</Button>
           </div>

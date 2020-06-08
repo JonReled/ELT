@@ -451,14 +451,16 @@ body {
 
 html {
   font-size: 14px;
+  padding: 1rem;
 }
 
 body {
-  margin: 0;
+  margin: 0 auto;
   padding: 0;
   overflow-x: hidden;
   min-width: 320px;
-  background: #FFFFFF;
+  max-width: 960px;
+  background-color: #eff3f8;
   font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
   font-size: 14px;
   line-height: 1.4285em;
@@ -38402,7 +38404,7 @@ ol.ui.suffixed.list li:before,
 /* Tab */
 
 .ui.segment.tab:last-child {
-  margin-bottom: 1rem;
+  margin: 50px 25px;
 }
 
 /*******************************
@@ -45407,9 +45409,11 @@ Floated Menu / Item
     -----------------------*/
 
 .ui.secondary.pointing.menu {
-  margin-left: 0;
-  margin-right: 0;
+  margin: 0 25px 25px 25px;
   border-bottom: 2px solid rgba(34, 36, 38, 0.15);
+  background-color: white;
+  font-size: 2rem;
+  border-radius: 0.28571429rem;
 }
 
 .ui.secondary.pointing.menu .item {
@@ -54400,7 +54404,7 @@ a.inverted.ui.card:hover,
   transform: none;
   border: none;
   top: 0;
-  background: rgba(0, 0, 0, 0.05);
+  background-color: #2185D0 !important;
   box-shadow: none;
   width: 3.5rem;
   height: 1.5rem;
@@ -54433,14 +54437,12 @@ a.inverted.ui.card:hover,
 /* Focus */
 
 .ui.toggle.checkbox input:focus ~ label:before {
-  background-color: rgba(0, 0, 0, 0.15);
   border: none;
 }
 
 /* Hover */
 
 .ui.toggle.checkbox label:hover::before {
-  background-color: rgba(0, 0, 0, 0.15);
   border: none;
 }
 
@@ -54466,7 +54468,7 @@ a.inverted.ui.card:hover,
 }
 
 .ui.toggle.checkbox input:focus:checked ~ label:before {
-  background-color: #0d71bb !important;
+  background-color: #2185D0;
 }
 
 /*******************************
