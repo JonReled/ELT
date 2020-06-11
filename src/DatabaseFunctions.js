@@ -1,6 +1,12 @@
 export function setUpDatabase() {
-    const defaultExerciseDatabase = [{value: 'Bench', text: 'Bench'}, {value: 'Deadlift', text: 'Deadlift'}, {value: 'Squat', text: 'Squat'}];
-    const defaultLogDatabase = {};
+    const defaultExerciseDatabase = [
+        {key:'Bench', value: 'Bench', text: 'Bench'}, 
+        {key:'Bench', value: 'Deadlift', text: 'Deadlift'}, 
+        {key:'Bench', value: 'Squat', text: 'Squat'}
+    ];
+    const defaultLogDatabase = {
+        
+    };
     const defaultUserSettings = {
     weightUnit: 'kg',
     heightUnit: 'cm'

@@ -7,10 +7,9 @@ import * as serviceWorker from './serviceWorker';
 import { LogStatsContext, ClickedDayContext, StandardTypeContext } from './Context.js';
 import { setUpDatabase } from './DatabaseFunctions'
 
-
 function App() {
   setUpDatabase();
-  const LogStatsHook = useState({});
+  const LogStatsHook = useState([]);
   const ClickedDayHook = useState(new Date());
   const StandardTypeHook = useState('Estimated Level');
 

@@ -1,14 +1,18 @@
 import React, { useState, useContext, useEffect } from 'react';
-import Calendar from 'react-calendar'
+import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import moment from 'moment';
-import { Button, Dropdown, Header, Table } from 'semantic-ui-react';
-import { NumericOnlyInput } from './components.js';
-import { LogStatsContext, ClickedDayContext } from './Context.js';
-import { addExerciseToDatabase, retrieveExerciseDatabase, addLogToDatabase, retrieveLogDatabase, removeLogFromDatabase } from './DatabaseFunctions';
-import './index.css'
+import {
+  Button, Dropdown, Header, Table, Icon,
+} from 'semantic-ui-react';
+import { NumericOnlyInput } from './components';
+import { LogStatsContext, ClickedDayContext } from './Context';
+import {
+  addExerciseToDatabase, retrieveExerciseDatabase, addLogToDatabase, retrieveLogDatabase, removeLogFromDatabase,
+} from './DatabaseFunctions';
+import './index.css';
 
-function Logs(props) {
+function Logs() {
   const [clickedDay, setClickedDay] = useContext(ClickedDayContext);
   const [currentTab, setcurrentTab] = useState('');
 
@@ -18,7 +22,7 @@ function Logs(props) {
   }
 
   function changeDayBackgroundIfHasLog(date, view) {
-    let dayHasLog = retrieveLogDatabase().hasOwnProperty(moment(date).format('DD MM YYYY'))
+    const dayHasLog = retrieveLogDatabase().hasOwnProperty(moment(date).format('DD MM YYYY'));
     if (view === 'month' && dayHasLog) {
       return 'dayWithLog';
     }
@@ -32,150 +36,147 @@ function Logs(props) {
     }
   }
 
-  return(
-    <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Calendar onClickDay={handleClickDay} tileClassName={({ activeStartDate, date, view }) => [changeDayBackgroundIfHasLog(date, view), changeDayBackgroundIfFuture(date, view)]} />
       <LogScreenButtons currentScreen={setcurrentTab} />
       {currentTab}
     </div>
-  )
+  );
 }
 
 function LogScreenButtons(props) {
   const [clickedDay] = useContext(ClickedDayContext);
-  let dayHasLog = retrieveLogDatabase().hasOwnProperty(moment(clickedDay).format('DD MM YYYY'));
-  let isInFuture = moment(clickedDay).isAfter();
-
-  useEffect(() => {
-    console.log('aa')
-  }, [dayHasLog])
+  const dayHasLog = retrieveLogDatabase().hasOwnProperty(moment(clickedDay).format('DD MM YYYY'));
+  const isInFuture = moment(clickedDay).isAfter();
 
   if (isInFuture) {
-    return <div></div>;
-  } else if (!dayHasLog) {
+    return <div />;
+  } if (!dayHasLog) {
     return (
       <div className="logScreenButtons">
         <Button className="logScreenButton" onClick={() => props.currentScreen(<LogScreenCreate />)}>Create Log</Button>
       </div>
-    )
-  } else if (dayHasLog) {
-      return (
-        <div className="logScreenButtons">
-          <Button className="logScreenButton" onClick={() => props.currentScreen(<LogScreenRemove />)} currentScreen={props.currentScreen}>Remove Log</Button>
-          <Button className="logScreenButton" onClick={() => props.currentScreen(<LogScreenView />)}>View log</Button>
-        </div>
-  )
+    );
+  } if (dayHasLog) {
+    return (
+      <div className="logScreenButtons">
+        <Button className="logScreenButton" onClick={() => props.currentScreen(<LogScreenRemove />)} currentScreen={props.currentScreen}>Remove Log</Button>
+        <Button className="logScreenButton" onClick={() => props.currentScreen(<LogScreenView />)}>View log</Button>
+      </div>
+    );
   }
 }
 
-function LogScreenCreate(props) {
+function LogScreenCreate() {
   const [exerciseToAdd, setExerciseToAdd] = useState('');
   const [currentlySelectedExercise, setCurrentlySelectedExercise] = useState('');
   const [displayedExercises, setDisplayedExercises] = useState([]);
   const [exerciseIndex, setExerciseIndex] = useState(0);
   const [isDisplayed, setIsDisplayed] = useState('flex');
+  const [warningMessage, setWarningMessage] = useState();
   const [logStats, setLogStats] = useContext(LogStatsContext);
   const [clickedDay] = useContext(ClickedDayContext);
-  const [warningMessage, setWarningMessage] = useState();
 
   function addExercise() {
-    setWarningMessage()
+    const exercise = {
+      exerciseName: currentlySelectedExercise,
+      Sets: '',
+      Reps: '',
+      Weight: '',
+    };
+
+    setWarningMessage();
     setDisplayedExercises(displayedExercises.concat(exerciseToAdd));
-    setExerciseIndex(exerciseIndex + 1);
-    setLogStats({...logStats, [exerciseIndex]: {exerciseName: '', Sets: '', Reps: '', Weight: ''}})
+    setExerciseIndex(logStats.length + 1);
+    setLogStats([...logStats, exercise]);
   }
 
   useEffect(() => {
-    setExerciseToAdd(<ExerciseRow exerciseName={currentlySelectedExercise} exerciseIndex={exerciseIndex} />)
-  }, [currentlySelectedExercise, exerciseIndex]);
+    setExerciseToAdd(<ExerciseRow exerciseName={currentlySelectedExercise} exerciseIndex={exerciseIndex} />);
+    setExerciseIndex(logStats.length);
+  }, [currentlySelectedExercise, exerciseIndex, logStats]);
 
   function handleChange(exerciseName) {
-    setCurrentlySelectedExercise(exerciseName)
+    setCurrentlySelectedExercise(exerciseName);
   }
 
   function handleSubmit(event) {
     let allInputsFilled = true;
     let allInputsNumber = true;
-    let logStatsArray = Object.entries(logStats);
 
-    for (let i = 0; i < logStatsArray.length; i++) {
-      let exercise = Object.entries(logStatsArray[i][1])
+    for (let i = 0; i < logStats.length; i++) {
+      const exercise = logStats[i];
 
       for (let j = 1; j < exercise.length; j++) {
-        let exerciseData = exercise[j];
+        const exerciseData = exercise[j];
 
         if (isNaN(exerciseData[1]) || exerciseData[1] < 0) {
           allInputsNumber = false;
-
         } else if (!exerciseData[1]) {
           allInputsFilled = false;
-
         }
-
       }
-
     }
 
-    if (Object.keys(logStats).length === 0) {
-      setWarningMessage(<h2 style={{color: 'red'}}>Please enter an exercise.</h2>);
-
+    if (logStats.length === 0) {
+      setWarningMessage(<h2 style={{ color: 'red' }}>Please enter an exercise.</h2>);
     } else if (!allInputsFilled) {
-      setWarningMessage(<h2 style={{color: 'red'}}>Please fill in all input boxes.</h2>);
-
+      setWarningMessage(<h2 style={{ color: 'red' }}>Please fill in all input boxes.</h2>);
     } else if (!allInputsNumber) {
-      setWarningMessage(<h2 style={{color: 'red'}}>Only numeric inputs that are greater than zero are allowed.</h2>);
-
+      setWarningMessage(<h2 style={{ color: 'red' }}>Only numeric inputs that are greater than zero are allowed.</h2>);
     } else {
       addLogToDatabase(logStats, moment(clickedDay).format('DD MM YYYY'));
-      setIsDisplayed('none')
-
+      setLogStats([]);
+      setIsDisplayed('none');
     }
-
   }
 
   return (
-      <div style={{display: isDisplayed, flexDirection: 'column', alignItems: 'center', padding: '1rem'}}>
-          <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>{displayedExercises}</div>
-          <Dropdown
-            allowAdditions
-            additionPosition='bottom'
-            placeholder='Select Exercise'
-            search
-            selection
-            options={retrieveExerciseDatabase()}
-            onAddItem={(_, event) => addExerciseToDatabase(event.value)}
-            onChange={(_, text) => handleChange(text.value)} 
-          />
-          <br />
-          <div style={{margin: '3px'}}>
-            <Button onClick={addExercise}>Add exercise</Button>
-            <Button primary onClick={(event) => handleSubmit(event)}>Submit</Button>
-          </div>
-          {warningMessage}
+    <div style={{
+      display: isDisplayed, flexDirection: 'column', alignItems: 'center', padding: '1rem',
+    }}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>{displayedExercises}</div>
+      <Dropdown
+        allowAdditions
+        additionPosition="bottom"
+        placeholder="Select Exercise"
+        search
+        selection
+        options={retrieveExerciseDatabase()}
+        onAddItem={(_, event) => addExerciseToDatabase(event.value)}
+        onChange={(_, text) => handleChange(text.value)}
+      />
+      <br />
+      <div style={{ margin: '3px' }}>
+        <Button onClick={addExercise}>Add exercise</Button>
+        <Button primary onClick={(event) => handleSubmit(event)}>Submit</Button>
       </div>
-  )
-  
+      {warningMessage}
+    </div>
+  );
 }
 
-function LogScreenView(props) {
+function LogScreenView() {
   const [clickedDay] = useContext(ClickedDayContext);
   const exerciseLog = retrieveLogDatabase()[moment(clickedDay).format('DD MM YYYY')];
 
-  let exerciseRows = [];
-  for (let i = 0; i < Object.keys(exerciseLog).length; i++) {
-    let exercise = exerciseLog[i];
-    exerciseRows.push(<TableExerciseRow exerciseName={exercise['exerciseName']} sets={exercise['Sets']} reps={exercise['Reps']} weight={exercise['Weight']} />)
+  const exerciseRows = [];
+  for (let i = 0; i < exerciseLog.length; i++) {
+    const exercise = exerciseLog[i];
+    exerciseRows.push(<TableExerciseRow exerciseName={exercise.exerciseName} sets={exercise.Sets} reps={exercise.Reps} weight={exercise.Weight} />);
   }
 
   return (
     <div>
-      <LogTable tableExerciseRows={exerciseRows}/>
+      <LogTable tableExerciseRows={exerciseRows} />
     </div>
-    
-  )
+
+  );
 }
 
-function LogScreenRemove(props) {
+function LogScreenRemove() {
   const [isDisplayed, setIsDisplayed] = useState('block');
   const [clickedDay] = useContext(ClickedDayContext);
 
@@ -185,31 +186,42 @@ function LogScreenRemove(props) {
   }
 
   return (
-    <div style={{display: isDisplayed, textAlign: 'center'}}>
+    <div style={{ display: isDisplayed, textAlign: 'center' }}>
       <h2>Are you sure?</h2>
       <Button negative onClick={(event) => RemoveLogAndDiv(event)}>Delete</Button>
       <Button positive onClick={() => setIsDisplayed('none')}>Return</Button>
     </div>
-  )
+  );
 }
 
 function ExerciseRow(props) {
   const [logStats] = useContext(LogStatsContext);
-  logStats[props.exerciseIndex].exerciseName = props.exerciseName;
+  const [isDisplayed, setIsDisplayed] = useState('flex');
 
-  function addExerciseToContext(value, placeholder) {
-      logStats[props.exerciseIndex][placeholder] = value;
-
+  function deleteExercise() {
+    logStats.splice(props.exerciseIndex, 1);
+    setIsDisplayed('none');
   }
 
-  return(
-      <div style={{marginBottom: '3px',width: '100%', display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
-          <p style={{margin: '5px', display: 'inline', fontSize:'1.5rem', width: '25%'}}>{props.exerciseName}:</p>
-          <NumericOnlyInput placeholder='Sets' handleChange={addExerciseToContext} />
-          <NumericOnlyInput placeholder='Reps' handleChange={addExerciseToContext} />
-          <NumericOnlyInput placeholder='Weight' handleChange={addExerciseToContext} />
-      </div>
-  )
+  function addExerciseToContext(value, placeholder) {
+    logStats[props.exerciseIndex][placeholder] = value;
+  }
+
+  return (
+    <div style={{
+      marginBottom: '3px', width: '100%', display: isDisplayed, flexDirection: 'row', alignItems: 'flex-start',
+    }}
+    >
+      <p style={{
+        margin: '5px', display: 'inline', fontSize: '1.5rem', width: '25%',
+      }}
+      >{props.exerciseName}:</p>
+      <NumericOnlyInput placeholder="Sets" handleChange={addExerciseToContext} />
+      <NumericOnlyInput placeholder="Reps" handleChange={addExerciseToContext} />
+      <NumericOnlyInput placeholder="Weight" handleChange={addExerciseToContext} />
+      <Icon onClick={deleteExercise} name="delete" style={{ position: 'relative', top: '5px', cursor: 'pointer' }} size="big" color="red" />
+    </div>
+  );
 }
 
 function LogTable(props) {
@@ -228,20 +240,20 @@ function LogTable(props) {
         {props.tableExerciseRows}
       </Table.Body>
     </Table>
-  )
+  );
 }
 
 function TableExerciseRow(props) {
   return (
     <Table.Row>
       <Table.Cell>
-        <Header as='h4' textAlign='center'>{props.exerciseName}</Header>
+        <Header as="h4" textAlign="center">{props.exerciseName}</Header>
       </Table.Cell>
-      <Table.Cell textAlign='center'>{props.sets}</Table.Cell>
-      <Table.Cell textAlign='center'>{props.reps}</Table.Cell>
-      <Table.Cell textAlign='center'>{props.weight}</Table.Cell>
+      <Table.Cell textAlign="center">{props.sets}</Table.Cell>
+      <Table.Cell textAlign="center">{props.reps}</Table.Cell>
+      <Table.Cell textAlign="center">{props.weight}</Table.Cell>
     </Table.Row>
-  )
+  );
 }
 
 export default Logs;

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { retrieveLogDatabase, retrieveUserPR, updateUserPR } from './DatabaseFunctions';
 import { Header, Table, Button, Icon } from 'semantic-ui-react';
 import { StandardTypeContext } from './Context.js';
+import { Chart } from './Chart';
 
 const defaultUserPRs = {
   Bench: {tested1RM: 0, estimated1RM: 0},
@@ -32,14 +33,14 @@ const ratiosToTotal = {
 }
 
 const strengthLevels = {
-  untrained: 0.15,
-  average: 0.20,
-  beginner: 0.35,
-  intermediate: 0.50,
-  advanced: 0.60,
-  elite: 0.70,
-  worldClass: 0.80,
-  recordBreaker: 0.95
+  untrained: [0.15, 'gray'],
+  average: [0.20, 'teal'],
+  beginner: [0.35, 'green'],
+  intermediate: [0.50, 'orange'],
+  advanced: [0.60, 'chocolate'],
+  elite: [0.70, 'crimson'],
+  worldClass: [0.80, 'darkSlateGray'],
+  recordBreaker: [0.95, 'black']
 }
 
 function Stats() {
@@ -58,8 +59,8 @@ function Stats() {
 
   }, [update]);
 
-  function brzyckiEquation(weight, reps) {
-    return weight * (36 / (37 - reps));
+  function kemmlerEquation(weight, reps) {
+    return weight * (0.988 + 0.0104*reps + 0.0019*reps*reps - 0.0000584*reps*reps*reps);
   }
 
   function calculateOneRM() {
@@ -72,11 +73,13 @@ function Stats() {
 
       for (let j = 0; j < Object.keys(Log).length; j++) {
         let exercise = Log[j];
+
+        if (!['Bench', 'Squat', 'Deadlift'].includes(exercise.exerciseName)) break;
         const currentEstimatedPR = retrieveUserPR()[exercise.exerciseName].estimated1RM;
         const currentTestedPR =  retrieveUserPR()[exercise.exerciseName].tested1RM;
 
-        if (brzyckiEquation(exercise.Weight, exercise.Reps) > currentEstimatedPR) {
-          let estimated1RM = Math.floor(brzyckiEquation(exercise.Weight, exercise.Reps));
+        if (kemmlerEquation(exercise.Weight, exercise.Reps) > currentEstimatedPR) {
+          let estimated1RM = Math.floor(kemmlerEquation(exercise.Weight, exercise.Reps));
           updateUserPR(exercise.exerciseName, estimated1RM, 'estimated1RM');
         }
 
@@ -94,16 +97,21 @@ function Stats() {
     let levelArray = [];
 
     for (let j = 0; j < user1RM.length; j++) {
+
+      if (user1RM[j] < calculateUserWorldRecord(75, 'male', exerciseName) * Object.values(strengthLevels)[0][0]) {
+        levelArray.push([Object.keys(strengthLevels)[0], Object.values(strengthLevels)[0][1]])
+      }
+
       for (let i = Object.keys(strengthLevels).length - 1; i > 0; i--) {
 
-        if (user1RM[j] >= calculateUserWorldRecord(75, 'male', exerciseName) * Object.values(strengthLevels)[i]) {
+        if (user1RM[j] >= calculateUserWorldRecord(75, 'male', exerciseName) * Object.values(strengthLevels)[i][0]) {
   
-          levelArray.push(Object.keys(strengthLevels)[i]);
+          levelArray.push([Object.keys(strengthLevels)[i], Object.values(strengthLevels)[i][1]]);
           break;
         }
       }
     }
-
+    
     return levelArray;
   }
 
@@ -111,6 +119,7 @@ function Stats() {
     <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
       <LogTable tableRows={tableRows} />
       <Button style={{margin: '0'}} onClick={calculateOneRM}>Calculate 1RM</Button>
+      <Chart />
     </div>
   )
 }
@@ -150,7 +159,7 @@ function TableRow(props) {
       </Table.Cell>
       <Table.Cell textAlign='center' >{props.tested1RM}</Table.Cell>
       <Table.Cell textAlign='center'>{props.estimated1RM}</Table.Cell>
-      <Table.Cell textAlign='center'>{standardType === 'Estimated Level' ? props.standard[0] : props.standard[1]}</Table.Cell>
+      <Table.Cell textAlign='center'>{standardType === 'Estimated Level' ? <h1 style={{color: props.standard[0][1]}}>{props.standard[0][0]}</h1> : <h1 style={{color: props.standard[1][1]}}>{props.standard[1][0]}</h1>}</Table.Cell>
     </Table.Row>
   )
 }
