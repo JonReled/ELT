@@ -21,6 +21,7 @@ module.exports = {
     quotes: ["error", "single"],
     "linebreak-style": ["error", "windows"],
     "no-plusplus": [2, { allowForLoopAfterthoughts: true }],
-    "max-len": ["error", { "code": 200 }]
+    "max-len": ["error", { "code": 200 }],
+    "react/react-in-jsx-scope": "off"
   },
 };

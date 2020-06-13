@@ -52,13 +52,13 @@ function LogScreenButtons(props) {
 
   if (isInFuture) {
     return <div />;
-  } if (!dayHasLog) {
+  } else if (!dayHasLog) {
     return (
       <div className="logScreenButtons">
         <Button className="logScreenButton" onClick={() => props.currentScreen(<LogScreenCreate />)}>Create Log</Button>
       </div>
     );
-  } if (dayHasLog) {
+  } else if (dayHasLog) {
     return (
       <div className="logScreenButtons">
         <Button className="logScreenButton" onClick={() => props.currentScreen(<LogScreenRemove />)} currentScreen={props.currentScreen}>Remove Log</Button>
@@ -107,28 +107,34 @@ function LogScreenCreate() {
 
     for (let i = 0; i < logStats.length; i++) {
       const exercise = logStats[i];
+      console.log(exercise);
+      for (let j = 1; j < Object.keys(exercise).length; j++) {
+        const exerciseData = Object.values(exercise)[j];
 
-      for (let j = 1; j < exercise.length; j++) {
-        const exerciseData = exercise[j];
-
-        if (isNaN(exerciseData[1]) || exerciseData[1] < 0) {
-          allInputsNumber = false;
-        } else if (!exerciseData[1]) {
+        if (exerciseData === "") {
           allInputsFilled = false;
+
+        } else if (isNaN(exerciseData) || exerciseData < 0) {
+          allInputsNumber = false;
+
         }
       }
     }
 
     if (logStats.length === 0) {
       setWarningMessage(<h2 style={{ color: 'red' }}>Please enter an exercise.</h2>);
+
     } else if (!allInputsFilled) {
       setWarningMessage(<h2 style={{ color: 'red' }}>Please fill in all input boxes.</h2>);
+
     } else if (!allInputsNumber) {
       setWarningMessage(<h2 style={{ color: 'red' }}>Only numeric inputs that are greater than zero are allowed.</h2>);
+
     } else {
       addLogToDatabase(logStats, moment(clickedDay).format('DD MM YYYY'));
       setLogStats([]);
       setIsDisplayed('none');
+      
     }
   }
 
