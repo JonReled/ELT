@@ -26,10 +26,6 @@
     "noImplicitAny": false,
     "downlevelIteration": true,
     "plugins": [
-      {
-        "transform": "ts-auto-mock/transformer",
-        "cacheBetweenTests": false
-      }
     ],
     "allowJs": true,
     "skipLibCheck": true,

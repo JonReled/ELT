@@ -1,27 +1,38 @@
 module.exports = {
-  env: {
-    browser: true,
-    es2020: true,
-  },
+  root: true,
+  parser: '@typescript-eslint/parser',
+  plugins: [
+    '@typescript-eslint',
+  ],
   extends: [
-    'plugin:react/recommended',
-    'airbnb',
+      "plugin:react/recommended",
+      "plugin:@typescript-eslint/recommended",
+      "prettier/@typescript-eslint",
+      "plugin:prettier/recommended",
+      "plugin:import/errors",
+      "plugin:import/warnings"
   ],
   parserOptions: {
-    ecmaFeatures: {
-      jsx: true,
-    },
-    ecmaVersion: 11,
-    sourceType: 'module',
+      ecmaVersion: 2018, // Allows for the parsing of modern ECMAScript features
+      sourceType: "module", // Allows for the use of imports
+      ecmaFeatures: {
+          jsx: true // Allows for the parsing of JSX
+      }
   },
-  plugins: [
-    'react',
-  ],
+  settings: {
+      react: {
+          version: "detect" // Tells eslint-plugin-react to automatically detect the version of React to use
+      }
+  },
   rules: {
-    quotes: ["error", "single"],
-    "linebreak-style": ["error", "windows"],
-    "no-plusplus": [2, { allowForLoopAfterthoughts: true }],
-    "max-len": ["error", { "code": 200 }],
-    "react/react-in-jsx-scope": "off"
-  },
+      "@typescript-eslint/explicit-function-return-type": 0,
+      "react/no-unescaped-entities": 0,
+      "react/prop-types": 0,
+      "react/jsx-indent": [2, 2],
+      "@typescript-eslint/no-explicit-any": 2,
+      "import/no-unresolved": 0,
+      "import/order": 2,
+      "import/named": 0,
+      "@typescript-eslint/no-use-before-define": ["error", { "functions": false }]
+  }
 };
