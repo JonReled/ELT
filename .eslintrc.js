@@ -1,6 +1,6 @@
 module.exports = {
   root: true,
-  parser: ['@typescript-eslint/parser', 'prettier'],
+  parser: '@typescript-eslint/parser',
   extends: [
     'prettier',
     'plugin:react/recommended',
@@ -16,6 +16,7 @@ module.exports = {
     sourceType: 'module', // Allows for the use of imports
     ecmaFeatures: {
       jsx: true, // Allows for the parsing of JSX
+      modules: true
     },
   },
   settings: {
