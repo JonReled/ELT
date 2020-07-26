@@ -1,33 +1,28 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import './semantic/dist/semantic.css';
 import TabExampleSecondaryPointing from './App';
 import * as serviceWorker from './serviceWorker';
 import { LogStatsContext, ClickedDayContext, StandardTypeContext } from './Context';
-import { setUpDatabase } from './DatabaseFunctions'
 
 function App() {
-  setUpDatabase();
-  const LogStatsHook = useState([]);
-  const ClickedDayHook = useState(new Date());
-  const StandardTypeHook = useState('Estimated Level');
+  const [stats, setStats] = useState([]);
+  const [date, setDate] = useState(new Date());
+  const [type, setType] = useState('Estimated Level');
 
-  return(
-    <LogStatsContext.Provider value={LogStatsHook}>
-      <ClickedDayContext.Provider value={ClickedDayHook}>
-        <StandardTypeContext.Provider value={StandardTypeHook}>
+  return (
+    <LogStatsContext.Provider value={{ stats, setStats }}>
+      <ClickedDayContext.Provider value={{ date, setDate }}>
+        <StandardTypeContext.Provider value={{ type, setType }}>
           <TabExampleSecondaryPointing />
         </StandardTypeContext.Provider>
       </ClickedDayContext.Provider>
     </LogStatsContext.Provider>
-  )
+  );
 }
 
-ReactDOM.render(
-  <App />,
-  document.getElementById('root')
-);
+ReactDOM.render(<App />, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

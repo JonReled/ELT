@@ -1,7 +1,31 @@
 import React from 'react';
 
-export const LogStatsContext = React.createContext([[], () => {}]);
+interface LogStatsContextProps {
+  stats: any[];
+  setStats: React.Dispatch<React.SetStateAction<any>>;
+}
 
-export const ClickedDayContext = React.createContext([new Date(), () => {}]);
+interface ClickedDayContextProps {
+  date: Date;
+  setDate: React.Dispatch<React.SetStateAction<any>>;
+}
 
-export const StandardTypeContext = React.createContext(['Estimated Level', () => {}]);
+interface StandardTypeContextProps {
+  type: string;
+  setType: React.Dispatch<React.SetStateAction<any>>;
+}
+
+export const LogStatsContext = React.createContext<LogStatsContextProps>({
+  stats: [],
+  setStats: () => null,
+});
+
+export const ClickedDayContext = React.createContext<ClickedDayContextProps>({
+  date: new Date(),
+  setDate: () => null,
+});
+
+export const StandardTypeContext = React.createContext<StandardTypeContextProps>({
+  type: 'Estimated Level',
+  setType: () => null,
+});

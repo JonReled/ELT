@@ -1,13 +1,14 @@
-import React from "react";
-import "./App.css";
-import { Tab } from "semantic-ui-react";
-import Stats from "./Stats";
-import { Settings } from "./Settings";
-import Logs from "./Logs";
+import React, { ReactElement } from 'react';
+import './App.css';
+import { Tab } from 'semantic-ui-react';
+import Stats from './Stats';
+import Settings from './Settings';
+import Logs from './Logs';
+import Programs from './Programs';
 
 const panes = [
   {
-    menuItem: "Stats",
+    menuItem: 'Stats',
 
     render: () => (
       <Tab.Pane attached={false}>
@@ -17,7 +18,7 @@ const panes = [
   },
 
   {
-    menuItem: "Logs",
+    menuItem: 'Logs',
 
     render: () => (
       <Tab.Pane attached={false}>
@@ -27,7 +28,7 @@ const panes = [
   },
 
   {
-    menuItem: "Settings",
+    menuItem: 'Settings',
 
     render: () => (
       <Tab.Pane attached={false}>
@@ -35,9 +36,19 @@ const panes = [
       </Tab.Pane>
     ),
   },
+
+  {
+    menuItem: 'Programs',
+
+    render: () => (
+      <Tab.Pane attached={false}>
+        <Programs />
+      </Tab.Pane>
+    ),
+  },
 ];
 
-function TabExampleSecondaryPointing() {
+function TabExampleSecondaryPointing(): ReactElement {
   return (
     <div>
       <Tab menu={{ secondary: true, pointing: true }} panes={panes} />

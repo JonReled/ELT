@@ -1,23 +1,18 @@
-import React, { useState } from 'react';
-import {
-  LineChart, Line, CartesianGrid, XAxis, YAxis,
-} from 'recharts';
+import React, { useState, ReactElement } from 'react';
+import { LineChart, Line, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { Dropdown } from 'semantic-ui-react';
-import { retrieveLogDatabase } from './DatabaseFunctions';
+import { retrieveLogDatabase } from './Database';
 
 const ExerciseDropdown = [
   {
-    key: 'Bench',
     text: 'Bench',
     value: 'Bench',
   },
   {
-    key: 'Deadlift',
     text: 'Deadlift',
     value: 'Deadlift',
   },
   {
-    key: 'Squat',
     text: 'Squat',
     value: 'Squat',
   },
@@ -25,24 +20,22 @@ const ExerciseDropdown = [
 
 const TypeDropdown = [
   {
-    key: 'Estimated',
     text: 'Estimated',
     value: 'estimated',
   },
   {
-    key: 'Tested',
     text: 'Tested',
     value: 'tested',
   },
 ];
 
-function kemmlerEquation(weight : number, reps : number) {
+export function kemmlerEquation(weight: number, reps: number): number {
   return weight * (0.988 + 0.0104 * reps + 0.0019 * reps * reps - 0.0000584 * reps * reps * reps);
 }
 
-function createCharts(exerciseName : string) {
+function createCharts(exerciseName: string): Array<[string, { estimated: number; tested: number }]> {
   const LogDatabase = Object.entries(retrieveLogDatabase());
-  const dailyPRs = [];
+  const dailyPRs: Array<[string, { estimated: number; tested: number }]> = [];
 
   for (let i = 0; i < LogDatabase.length; i++) {
     const Log = LogDatabase[i][1];
@@ -72,29 +65,15 @@ function createCharts(exerciseName : string) {
   return dailyPRs;
 }
 
-export function Chart() {
+function Chart(): ReactElement {
   const [chartExercise, setChartExercise] = useState('Bench');
   const [chartType, setChartType] = useState('estimated');
 
   return (
     <div>
       <span>
-        View
-        {' '}
-        <Dropdown
-          inline
-          options={TypeDropdown}
-          defaultValue={TypeDropdown[0].value}
-          onChange={(_, data) => setChartType(data.value)}
-        />
-        1RM per Day for
-        {' '}
-        <Dropdown
-          inline
-          options={ExerciseDropdown}
-          defaultValue={ExerciseDropdown[0].value}
-          onChange={(_, data) => setChartExercise(data.value)}
-        />
+        View <Dropdown inline options={TypeDropdown} defaultValue={TypeDropdown[0].value} onChange={(_, data) => setChartType(data.value as string)} />
+        1RM per Day for <Dropdown inline options={ExerciseDropdown} defaultValue={ExerciseDropdown[0].value} onChange={(_, data) => setChartExercise(data.value as string)} />
       </span>
       <LineChart width={600} height={300} data={createCharts(chartExercise)}>
         <Line type="monotone" dataKey={`[1]${chartType}`} stroke="#8884d8" />
@@ -105,3 +84,5 @@ export function Chart() {
     </div>
   );
 }
+
+export default Chart;
