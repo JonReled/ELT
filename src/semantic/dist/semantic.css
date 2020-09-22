@@ -89,7 +89,7 @@ main {
 
 h1 {
   font-size: 2em;
-  margin: 0.67em 0;
+  margin: 0;
 }
 
 /* Grouping content
@@ -478,7 +478,7 @@ h4,
 h5 {
   font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
   line-height: 1.28571429em;
-  margin: calc(2rem - 0.1428571428571429em) 0 1rem;
+  /*margin: calc(2rem - 0.1428571428571429em) 0 1rem; */
   font-weight: bold;
   padding: 0;
 }
@@ -663,7 +663,7 @@ body .ui.inverted:not(.dimmer)::-webkit-scrollbar-thumb:hover {
   background: #E0E1E2 none;
   color: rgba(0, 0, 0, 0.6);
   font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-  margin: 0 0.25em 0 0;
+  margin: 0 0 0 0;
   padding: 0.78571429em 1.5em 0.78571429em;
   text-transform: none;
   text-shadow: none;
@@ -42238,9 +42238,7 @@ span.ui.massive.text {
   justify-content: inherit;
   align-items: stretch;
   width: 100% !important;
-  padding: 0;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+  padding: 0.5rem 1rem 0.5rem 1rem;
 }
 
 /*-------------------

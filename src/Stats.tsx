@@ -2,8 +2,7 @@ import React, { useState, useEffect, useContext, ReactElement } from 'react';
 import { Header, Table, Button, Icon } from 'semantic-ui-react';
 import { retrieveLogDatabase, retrieveUserPR, updateUserPR } from './Database';
 import { StandardTypeContext } from './Context';
-import Chart from './Chart';
-import { kemmlerEquation } from './Chart';
+import Chart, { kemmlerEquation } from './Chart';
 
 const defaultUserPRs = {
   Bench: { tested1RM: 0, estimated1RM: 0 },
@@ -64,6 +63,27 @@ function Stats(): ReactElement {
   const [tableRows, setTableRows] = useState<any[]>([]);
   const [update, setUpdate] = useState(0);
 
+  function calculateUserExerciseLevel(exerciseName, user1RM) {
+    const levelArray: any[] = [];
+
+    for (let j = 0; j < user1RM.length; j++) {
+      let strengthLevelMultiplier: number = Object.values(strengthLevels)[0][0] as number;
+      if (user1RM[j] < calculateUserWorldRecord(78, 'male', exerciseName) * strengthLevelMultiplier) {
+        levelArray.push([Object.keys(strengthLevels)[0], Object.values(strengthLevels)[0][1]]);
+      }
+
+      for (let i = Object.keys(strengthLevels).length - 1; i > 0; i--) {
+        strengthLevelMultiplier = Object.values(strengthLevels)[i][0] as number;
+        if (user1RM[j] >= calculateUserWorldRecord(78, 'male', exerciseName) * strengthLevelMultiplier) {
+          levelArray.push([Object.keys(strengthLevels)[i], Object.values(strengthLevels)[i][1]]);
+          break;
+        }
+      }
+    }
+
+    return levelArray;
+  }
+  
   useEffect(() => {
     const newTableRows: JSX.Element[] = [];
 
@@ -112,27 +132,6 @@ function Stats(): ReactElement {
       updateUserPR('Total', retrieveUserPR().Bench.estimated1RM + retrieveUserPR().Squat.estimated1RM + retrieveUserPR().Deadlift.estimated1RM, 'estimated1RM');
       updateUserPR('Total', retrieveUserPR().Bench.tested1RM + retrieveUserPR().Squat.tested1RM + retrieveUserPR().Deadlift.tested1RM, 'tested1RM');
     }
-  }
-
-  function calculateUserExerciseLevel(exerciseName, user1RM) {
-    const levelArray: any[] = [];
-
-    for (let j = 0; j < user1RM.length; j++) {
-      let strengthLevelMultiplier: number = Object.values(strengthLevels)[0][0] as number;
-      if (user1RM[j] < calculateUserWorldRecord(75, 'male', exerciseName) * strengthLevelMultiplier) {
-        levelArray.push([Object.keys(strengthLevels)[0], Object.values(strengthLevels)[0][1]]);
-      }
-
-      for (let i = Object.keys(strengthLevels).length - 1; i > 0; i--) {
-        let strengthLevelMultiplier: number = Object.values(strengthLevels)[i][0] as number;
-        if (user1RM[j] >= calculateUserWorldRecord(75, 'male', exerciseName) * strengthLevelMultiplier) {
-          levelArray.push([Object.keys(strengthLevels)[i], Object.values(strengthLevels)[i][1]]);
-          break;
-        }
-      }
-    }
-
-    return levelArray;
   }
 
   return (
@@ -189,8 +188,8 @@ function TableRow(props) {
   const standardType = useContext(StandardTypeContext);
   const { exerciseName, tested1RM, estimated1RM, standard } = props;
 
-  return ( 
-  <Table.Row>
+  return (
+    <Table.Row>
       <Table.Cell>
         <Header as="h4" textAlign="center">
           {exerciseName}
@@ -199,11 +198,7 @@ function TableRow(props) {
       <Table.Cell textAlign="center">{tested1RM}</Table.Cell>
       <Table.Cell textAlign="center">{estimated1RM}</Table.Cell>
       <Table.Cell textAlign="center">
-        {standardType.type === 'Estimated Level' ? (
-          <h1 style={{ color: standard[0][1] }}>{standard[0][0]}</h1>
-        ) : (
-          <h1 style={{ color: standard[1][1] }}>{standard[1][0]}</h1>
-        )}
+        {standardType.type === 'Estimated Level' ? <h1 style={{ color: standard[0][1] }}>{standard[0][0]}</h1> : <h1 style={{ color: standard[1][1] }}>{standard[1][0]}</h1>}
       </Table.Cell>
     </Table.Row>
   );

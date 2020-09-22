@@ -1,3 +1,5 @@
+import { Program } from './Programs';
+
 const defaultExerciseDatabase = [
   { value: 'Bench', text: 'Bench' },
   { value: 'Deadlift', text: 'Deadlift' },
@@ -12,6 +14,47 @@ const defaultUserPRs = {
   Deadlift: { tested1RM: 0, estimated1RM: 0 },
   Squat: { tested1RM: 0, estimated1RM: 0 },
   Total: { tested1RM: 0, estimated1RM: 0 },
+};
+
+const defaultPrograms = {
+  'Starting Strength': {
+    name: 'Starting Strength',
+    author: 'Mark Rippetoe',
+    level: 'Beginner',
+    days: '3',
+    program: [
+      [
+        { exerciseName: 'Squat', Sets: 3, Reps: 5 },
+        { exerciseName: 'Bench', Sets: 3, Reps: 5 },
+        { exerciseName: 'Deadlift', Sets: 1, Reps: 5 },
+      ],
+      [
+        { exerciseName: 'Squat', Sets: 3, Reps: 5 },
+        { exerciseName: 'Press', Sets: 3, Reps: 5 },
+        { exerciseName: 'Deadlift', Sets: 1, Reps: 5 },
+      ],
+    ],
+    notes: 'The goal is to add as much weight per session as possible. Eventually you can switch out deadlifts for rows and do those every other day.',
+  },
+  'Stronglifts 5x5': {
+    name: 'Stronglifts 5x5',
+    author: 'Mehdi',
+    level: 'Beginner',
+    days: '3',
+    program: [
+      [
+        { exerciseName: 'Squat', Sets: 5, Reps: 5 },
+        { exerciseName: 'Bench', Sets: 5, Reps: 5 },
+        { exerciseName: 'Barbell Row', Sets: 5, Reps: 5 },
+      ],
+      [
+        { exerciseName: 'Squat', Sets: 5, Reps: 5 },
+        { exerciseName: 'Press', Sets: 5, Reps: 5 },
+        { exerciseName: 'Deadlift', Sets: 1, Reps: 5 },
+      ],
+    ],
+    notes: 'anal',
+  },
 };
 
 interface Exercise {
@@ -113,4 +156,19 @@ export function updateUserPR(exerciseName: string, value: number, type: string):
   }
   currentPRs[exerciseName][type] = value;
   localStorage.setItem('userPRs', JSON.stringify(currentPRs));
+}
+
+export function setUserProgram(program: Omit<Program, 'setViewedName' | 'setEditing'>): void {
+  const currentPrograms = JSON.parse(localStorage.getItem('databasePrograms') as string);
+  currentPrograms[program.name] = program;
+  localStorage.setItem('databasePrograms', JSON.stringify(currentPrograms));
+  localStorage.setItem('userProgram', JSON.stringify(program));
+}
+
+export function retrievePrograms(): Array<Omit<Program, 'setViewedName' | 'setEditing'>> {
+  if (localStorage.getItem('databasePrograms') !== null) {
+    return Object.values(JSON.parse(localStorage.getItem('databasePrograms') as string));
+  }
+  localStorage.setItem('databasePrograms', JSON.stringify(defaultPrograms));
+  return Object.values(defaultPrograms);
 }

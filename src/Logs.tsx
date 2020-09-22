@@ -36,29 +36,29 @@ function Logs(): ReactElement {
   );
 }
 
-function LogScreenButtons(props: {currentScreen: React.Dispatch<React.SetStateAction<JSX.Element>>}): ReactElement {
+function LogScreenButtons(props: { currentScreen: React.Dispatch<React.SetStateAction<JSX.Element>> }): ReactElement {
   const { currentScreen } = props;
   const clickedDay = useContext(ClickedDayContext);
-  const dayHasLog = Object.prototype.hasOwnProperty.call(retrieveLogDatabase(), moment(clickedDay.date).format('DD MM YYYY'))
+  const dayHasLog = Object.prototype.hasOwnProperty.call(retrieveLogDatabase(), moment(clickedDay.date).format('DD MM YYYY'));
   const isInFuture = moment(clickedDay.date).isAfter();
-  
+
   if (isInFuture) {
     return <div />;
   }
   return (
-      <div className="logScreenButtons">
-        <Button className="logScreenButton" onClick={() => currentScreen(<LogScreenCreate />)} style={{display: dayHasLog ? 'none' : 'block'}} >
-          Create Log
-        </Button>
-        <Button className="logScreenButton" onClick={() => currentScreen(<LogScreenRemove />)} style={{display: dayHasLog ? 'block' : 'none'}} >
-          Remove Log
-        </Button>
-        <Button className="logScreenButton" onClick={() => currentScreen(<LogScreenView />)} style={{display: dayHasLog ? 'block' : 'none'}} >
-          View log
-        </Button>     
-      </div>
-    );
-  }
+    <div className="logScreenButtons">
+      <Button className="logScreenButton" onClick={() => currentScreen(<LogScreenCreate />)} style={{ display: dayHasLog ? 'none' : 'block' }}>
+        Create Log
+      </Button>
+      <Button className="logScreenButton" onClick={() => currentScreen(<LogScreenRemove />)} style={{ display: dayHasLog ? 'block' : 'none' }}>
+        Remove Log
+      </Button>
+      <Button className="logScreenButton" onClick={() => currentScreen(<LogScreenView />)} style={{ display: dayHasLog ? 'block' : 'none' }}>
+        View log
+      </Button>
+    </div>
+  );
+}
 
 function LogScreenCreate(): ReactElement {
   const [exerciseToAdd, setExerciseToAdd] = useState<ReactElement>(<div />);
@@ -102,11 +102,10 @@ function LogScreenCreate(): ReactElement {
 
       for (let j = 1; j < Object.keys(exercise).length; j++) {
         const exerciseData: number | string = Object.values(exercise)[j];
-        console.log(Object.values(exercise));
 
         if (exerciseData === '') {
           allInputsFilled = false;
-        } else if ( isNaN(exerciseData as number) || exerciseData < 0) {
+        } else if (Number.isNaN(exerciseData) || exerciseData < 0) {
           allInputsNumber = false;
         }
       }
@@ -204,28 +203,25 @@ function LogScreenRemove(): ReactElement {
   );
 }
 
-function ExerciseRow(props): ReactElement {
+function ExerciseRow({ exerciseName, exerciseIndex }): ReactElement {
   const log = useContext(LogStatsContext);
   const [isDisplayed, setIsDisplayed] = useState('flex');
-  const { exerciseName } = props;
 
   function deleteExercise() {
-    log.stats.splice(props.exerciseIndex, 1);
+    log.stats.splice(exerciseIndex, 1);
     setIsDisplayed('none');
   }
 
   function addExerciseToContext(value, placeholder) {
-    log.stats[props.exerciseIndex][placeholder] = value;
+    log.stats[exerciseIndex][placeholder] = value;
   }
 
   return (
-    <div style={{ marginBottom: '3px', width: '100%', display: isDisplayed, flexDirection: 'row', alignItems: 'flex-start',}}>
-      <p style={{ margin: '5px', display: 'inline', fontSize: '1.5rem', width: '25%',}}>
-        {exerciseName}:
-      </p>
-      <NumericOnlyInput placeholder="Sets" handleChange={addExerciseToContext} />
-      <NumericOnlyInput placeholder="Reps" handleChange={addExerciseToContext} />
-      <NumericOnlyInput placeholder="Weight" handleChange={addExerciseToContext} />
+    <div style={{ marginBottom: '3px', width: '100%', display: isDisplayed, flexDirection: 'row', alignItems: 'flex-start' }}>
+      <p style={{ margin: '5px', display: 'inline', fontSize: '1.5rem', width: '25%' }}>{exerciseName}:</p>
+      <NumericOnlyInput defaultValue="" placeholder="Sets" handleChange={addExerciseToContext} />
+      <NumericOnlyInput defaultValue="" placeholder="Reps" handleChange={addExerciseToContext} />
+      <NumericOnlyInput defaultValue="" placeholder="Weight" handleChange={addExerciseToContext} />
       <Icon onClick={deleteExercise} name="delete" style={{ position: 'relative', top: '5px', cursor: 'pointer' }} size="big" color="red" />
     </div>
   );
@@ -250,8 +246,7 @@ function LogTable(props): ReactElement {
   );
 }
 
-function TableExerciseRow({ exerciseName, sets, reps, weight }: {exerciseName: string, sets: number, reps: number, weight: number}): ReactElement {
-
+function TableExerciseRow({ exerciseName, sets, reps, weight }: { exerciseName: string; sets: number; reps: number; weight: number }): ReactElement {
   return (
     <Table.Row>
       <Table.Cell>

@@ -2,7 +2,6 @@ module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
   extends: [
-    'prettier',
     'plugin:react/recommended',
     'plugin:@typescript-eslint/recommended',
     'prettier/@typescript-eslint',
@@ -10,6 +9,8 @@ module.exports = {
     'plugin:import/errors',
     'plugin:import/warnings',
     'airbnb',
+    'prettier/react',
+    'prettier'
   ],
   parserOptions: {
     ecmaVersion: 2018, // Allows for the parsing of modern ECMAScript features
@@ -41,5 +42,11 @@ module.exports = {
     'no-continue': 0,
     'react/jsx-one-expression-per-line': 0,
     'max-len': ['error', { code: 180 }],
+    'react/jsx-props-no-spreading': 0,
+    'react/no-unused-prop-types': 0,
   },
+  globals: {
+    'localStorage': true,
+    'document': true
+  }
 };
