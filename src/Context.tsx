@@ -11,8 +11,8 @@ interface ClickedDayContextProps {
 }
 
 interface StandardTypeContextProps {
-  type: string;
-  setType: React.Dispatch<React.SetStateAction<any>>;
+  value: string;
+  set: React.Dispatch<React.SetStateAction<any>>;
 }
 
 interface NewProgramContextProps {
@@ -31,8 +31,8 @@ export const ClickedDayContext = React.createContext<ClickedDayContextProps>({
 });
 
 export const StandardTypeContext = React.createContext<StandardTypeContextProps>({
-  type: 'Estimated Level',
-  setType: () => null,
+  value: 'Estimated Level',
+  set: () => null,
 });
 
 export const NewProgramContext = React.createContext<NewProgramContextProps>({

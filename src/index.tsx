@@ -9,13 +9,13 @@ import { LogStatsContext, ClickedDayContext, StandardTypeContext, NewProgramCont
 function App() {
   const [stats, setStats] = useState([]);
   const [date, setDate] = useState(new Date());
-  const [type, setType] = useState('Estimated Level');
+  const [value, set] = useState('Estimated Level');
   const [program, setProgram] = useState([]);
 
   return (
     <LogStatsContext.Provider value={{ stats, setStats }}>
       <ClickedDayContext.Provider value={{ date, setDate }}>
-        <StandardTypeContext.Provider value={{ type, setType }}>
+        <StandardTypeContext.Provider value={{ value, set }}>
           <NewProgramContext.Provider value={{ program, setProgram }}>
             <TabExampleSecondaryPointing />
           </NewProgramContext.Provider>

@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react';
 import { Checkbox, Label } from 'semantic-ui-react';
-import { retrieveUserSettingsDatabase, updateUserSettingsDatabase } from './Database';
+import { retrieveUserSettings, updateUserSettings } from './Database';
 
 function Settings(): ReactElement {
   return (
@@ -25,12 +25,12 @@ function WeightUnitToggleSwitch() {
       toggle
       onChange={(event, data) => {
         if (data.checked) {
-          updateUserSettingsDatabase('weightUnit', 'lb');
+          updateUserSettings('weightUnit', 'lb');
         } else {
-          updateUserSettingsDatabase('weightUnit', 'kg');
+          updateUserSettings('weightUnit', 'kg');
         }
       }}
-      defaultChecked={retrieveUserSettingsDatabase('weightUnit') === 'lb'}
+      defaultChecked={retrieveUserSettings('weightUnit') === 'lb'}
     />
   );
 }
@@ -41,12 +41,12 @@ function HeightUnitToggleSwitch() {
       toggle
       onChange={(event, data) => {
         if (data.checked) {
-          updateUserSettingsDatabase('heightUnit', 'ft');
+          updateUserSettings('heightUnit', 'ft');
         } else {
-          updateUserSettingsDatabase('heightUnit', 'cm');
+          updateUserSettings('heightUnit', 'cm');
         }
       }}
-      defaultChecked={retrieveUserSettingsDatabase('heightUnit') === 'ft'}
+      defaultChecked={retrieveUserSettings('heightUnit') === 'ft'}
     />
   );
 }

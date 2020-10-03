@@ -69,7 +69,7 @@ interface ExerciseLogEntry {
   Weight: number;
 }
 
-export function addExerciseToDatabase(exerciseName: string): void {
+export function createExercise(exerciseName: string): void {
   let currentDatabase: Array<Exercise>;
   if (localStorage.getItem('exerciseDatabase') === null) {
     currentDatabase = defaultExerciseDatabase;
@@ -81,14 +81,14 @@ export function addExerciseToDatabase(exerciseName: string): void {
   localStorage.setItem('exerciseDatabase', JSON.stringify(currentDatabase));
 }
 
-export function retrieveExerciseDatabase(): Array<Exercise> {
+export function retrieveExercise(): Array<Exercise> {
   if (localStorage.getItem('exerciseDatabase') === null) {
     return defaultExerciseDatabase;
   }
   return JSON.parse(localStorage.getItem('exerciseDatabase') as string);
 }
 
-export function addLogToDatabase(exerciseLog: Array<ExerciseLogEntry>, day: string): void {
+export function addLog(exerciseLog: Array<ExerciseLogEntry>, day: string): void {
   let currentLog: { day: Array<ExerciseLogEntry> };
   if (localStorage.getItem('logDatabase') === null) {
     currentLog = { day: exerciseLog };
@@ -99,7 +99,7 @@ export function addLogToDatabase(exerciseLog: Array<ExerciseLogEntry>, day: stri
   localStorage.setItem('logDatabase', JSON.stringify(currentLog));
 }
 
-export function removeLogFromDatabase(day: string): void {
+export function removeLog(day: string): void {
   if (localStorage.getItem('logDatabase') === null) {
     return;
   }
@@ -108,7 +108,7 @@ export function removeLogFromDatabase(day: string): void {
   localStorage.setItem('logDatabase', JSON.stringify(currentLog));
 }
 
-export function retrieveLogDatabase(): { day: Array<ExerciseLogEntry> } {
+export function retrieveLog(): { day: Array<ExerciseLogEntry> } {
   let log: { day: Array<ExerciseLogEntry> };
   if (localStorage.getItem('logDatabase') === null) {
     log = { day: [] };
@@ -119,7 +119,7 @@ export function retrieveLogDatabase(): { day: Array<ExerciseLogEntry> } {
   return log;
 }
 
-export function updateUserSettingsDatabase(settingName: string, value: string): void {
+export function updateUserSettings(settingName: string, value: string): void {
   if (localStorage.getItem('userSettings') === null) {
     localStorage.setItem('userSettings', JSON.stringify(defaultUserSettings));
   } else {
@@ -129,7 +129,7 @@ export function updateUserSettingsDatabase(settingName: string, value: string): 
   }
 }
 
-export function retrieveUserSettingsDatabase(settingName: string): string {
+export function retrieveUserSettings(settingName: string): string {
   let returnedSetting: string;
   if (localStorage.getItem('userSettings') === null) {
     returnedSetting = defaultUserSettings[settingName];

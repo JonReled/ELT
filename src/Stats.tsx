@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useContext, ReactElement } from 'react';
+import React, { useContext, ReactElement } from 'react';
 import { Header, Table, Button, Icon } from 'semantic-ui-react';
-import { retrieveLogDatabase, retrieveUserPR, updateUserPR } from './Database';
+import { retrieveLog, retrieveUserPR, updateUserPR } from './Database';
 import { StandardTypeContext } from './Context';
 import Chart, { kemmlerEquation } from './Chart';
 
@@ -11,104 +11,95 @@ const defaultUserPRs = {
   Total: { tested1RM: 0, estimated1RM: 0 },
 };
 
-const strengthStandards = {
-  male: {
-    67: [6.42, 291.7],
-    75: [8.671, 140.7],
-    83: [15.74, -389.7],
-    90: [3.425, 625.3],
-    100: [3.704, 600.3],
-    110: [2.546, 713.5],
-    125: [3.273, 634.5],
-    140: [5.986, 305.2],
-    shw: [1.154, 926.6],
-  },
-};
+function calculateUserWorldRecord(bw: number, gender: 'male' | 'female', exerciseName: string): number {
+  const ratiosToTotal = {
+    Deadlift: 0.3968,
+    Squat: 0.3452,
+    Bench: 0.258,
+    Total: 1,
+  };
 
-const ratiosToTotal = {
-  Deadlift: 0.3968,
-  Squat: 0.3452,
-  Bench: 0.258,
-  Total: 1,
-};
-
-const strengthLevels = {
-  untrained: [0.15, 'gray'],
-  average: [0.2, 'teal'],
-  beginner: [0.35, 'green'],
-  intermediate: [0.5, 'orange'],
-  advanced: [0.6, 'chocolate'],
-  elite: [0.7, 'crimson'],
-  worldClass: [0.8, 'darkSlateGray'],
-  recordBreaker: [0.95, 'black'],
-};
-
-function calculateUserWorldRecord(bw: number, gender: string, exerciseName: string): number {
   if (gender === 'male') {
-    if (bw > 140) {
-      return strengthStandards.male.shw[0] * bw + strengthStandards.male.shw[1];
+    if (bw < 67) {
+      return Math.round((6.42 * bw + 291.7) * ratiosToTotal[exerciseName]);
     }
-    const weightClasses: number[] = Object.keys(strengthStandards.male).map((key) => parseInt(key, 10));
-
-    for (let i = 0; i < weightClasses.length; i++) {
-      if (bw < weightClasses[i]) {
-        return Math.round((Object.values(strengthStandards.male)[i][0] * bw + Object.values(strengthStandards.male)[i][1]) * ratiosToTotal[exerciseName]);
-      }
+    if (bw < 75) {
+      return Math.round((8.671 * bw + 140.7) * ratiosToTotal[exerciseName]);
     }
+    if (bw < 83) {
+      return Math.round((15.74 * bw - 389.7) * ratiosToTotal[exerciseName]);
+    }
+    if (bw < 90) {
+      return Math.round((3.425 * bw + 625.3) * ratiosToTotal[exerciseName]);
+    }
+    if (bw < 100) {
+      return Math.round((3.704 * bw + 600.3) * ratiosToTotal[exerciseName]);
+    }
+    if (bw < 110) {
+      return Math.round((2.546 * bw + 713.5) * ratiosToTotal[exerciseName]);
+    }
+    if (bw < 125) {
+      return Math.round((3.273 * bw + 634.5) * ratiosToTotal[exerciseName]);
+    }
+    if (bw < 140) {
+      return Math.round((5.986 * bw + 305.2) * ratiosToTotal[exerciseName]);
+    }
+    return Math.round((1.154 * bw + 926.6) * ratiosToTotal[exerciseName]);
   }
-  return 0;
+  if (bw < 48) {
+    return Math.round((21 * bw - 569.0) * ratiosToTotal[exerciseName]);
+  }
+  if (bw < 52) {
+    return Math.round((15.54 * bw - 315.1) * ratiosToTotal[exerciseName]);
+  }
+  if (bw < 56) {
+    return Math.round((15.09 * bw - 292.3) * ratiosToTotal[exerciseName]);
+  }
+  if (bw < 67.5) {
+    return Math.round((16.18 * bw - 353.4) * ratiosToTotal[exerciseName]);
+  }
+  if (bw < 75) {
+    return Math.round((3.963 * bw + 351.3) * ratiosToTotal[exerciseName]);
+  }
+  if (bw < 90) {
+    return Math.round((6.419 * bw + 169.4) * ratiosToTotal[exerciseName]);
+  }
+  return Math.round((1.005 * bw + 610.6) * ratiosToTotal[exerciseName]);
+}
+
+function calculateUserExerciseLevel(exerciseName, user1RM) {
+  const worldRecord = calculateUserWorldRecord(122, 'male', exerciseName);
+  if (user1RM > worldRecord * 0.95) {
+    return { level: 'recordBreaker', color: 'black' };
+  }
+  if (user1RM > worldRecord * 0.8) {
+    return { level: 'worldClass', color: 'darkSlateGray' };
+  }
+  if (user1RM > worldRecord * 0.7) {
+    return { level: 'elite', color: 'crimson' };
+  }
+  if (user1RM > worldRecord * 0.6) {
+    return { level: 'advanced', color: 'chocolate' };
+  }
+  if (user1RM > worldRecord * 0.5) {
+    return { level: 'intermediate', color: 'orange' };
+  }
+  if (user1RM > worldRecord * 0.35) {
+    return { level: 'beginner', color: 'green' };
+  }
+  if (user1RM > worldRecord * 0.2) {
+    return { level: 'average', color: 'teal' };
+  }
+  return { level: 'untrained', color: 'gray' };
 }
 
 function Stats(): ReactElement {
-  const [tableRows, setTableRows] = useState<any[]>([]);
-  const [update, setUpdate] = useState(0);
-
-  function calculateUserExerciseLevel(exerciseName, user1RM) {
-    const levelArray: any[] = [];
-
-    for (let j = 0; j < user1RM.length; j++) {
-      let strengthLevelMultiplier: number = Object.values(strengthLevels)[0][0] as number;
-      if (user1RM[j] < calculateUserWorldRecord(78, 'male', exerciseName) * strengthLevelMultiplier) {
-        levelArray.push([Object.keys(strengthLevels)[0], Object.values(strengthLevels)[0][1]]);
-      }
-
-      for (let i = Object.keys(strengthLevels).length - 1; i > 0; i--) {
-        strengthLevelMultiplier = Object.values(strengthLevels)[i][0] as number;
-        if (user1RM[j] >= calculateUserWorldRecord(78, 'male', exerciseName) * strengthLevelMultiplier) {
-          levelArray.push([Object.keys(strengthLevels)[i], Object.values(strengthLevels)[i][1]]);
-          break;
-        }
-      }
-    }
-
-    return levelArray;
-  }
-  
-  useEffect(() => {
-    const newTableRows: JSX.Element[] = [];
-
-    for (let i = 0; i < Object.keys(retrieveUserPR()).length; i++) {
-      const exercise = Object.entries(retrieveUserPR())[i];
-
-      newTableRows.push(
-        <TableRow
-          exerciseName={exercise[0]}
-          estimated1RM={exercise[1].estimated1RM}
-          tested1RM={exercise[1].tested1RM}
-          standard={calculateUserExerciseLevel(exercise[0], [exercise[1].estimated1RM, exercise[1].tested1RM])}
-        />,
-      );
-    }
-    setTableRows(newTableRows);
-  }, [update]);
-
   function calculateOneRM() {
-    const LogDatabase = Object.entries(retrieveLogDatabase());
-    setUpdate(update + 1);
+    const LogDatabase = Object.values(retrieveLog());
     localStorage.setItem('userPRs', JSON.stringify(defaultUserPRs));
 
     for (let i = 0; i < LogDatabase.length; i++) {
-      const Log = LogDatabase[i][1];
+      const Log = LogDatabase[i];
 
       for (let j = 0; j < Object.keys(Log).length; j++) {
         const exercise = Log[j];
@@ -136,7 +127,7 @@ function Stats(): ReactElement {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <LogTable tableRows={tableRows} />
+      <LogTable />
       <Button style={{ margin: '0' }} onClick={calculateOneRM}>
         Calculate 1RM
       </Button>
@@ -145,15 +136,11 @@ function Stats(): ReactElement {
   );
 }
 
-function LogTable(props) {
+function LogTable(): ReactElement {
   const standardType = useContext(StandardTypeContext);
-  const { tableRows } = props;
 
-  function changeLevel() {
-    if (standardType.type === 'Estimated Level') {
-      return standardType.setType('Tested Level');
-    }
-    return standardType.setType('Estimated Level');
+  function changeLevel(): void {
+    standardType.set(standardType.value === 'Estimated Level' ? 'Tested Level' : 'Estimated Level');
   }
 
   return (
@@ -164,7 +151,7 @@ function LogTable(props) {
           <Table.HeaderCell style={{ width: '25%' }}>Tested 1RM</Table.HeaderCell>
           <Table.HeaderCell style={{ width: '25%' }}>Estimated 1RM</Table.HeaderCell>
           <Table.HeaderCell style={{ position: 'relative' }}>
-            {standardType.type}{' '}
+            {standardType.value}{' '}
             <Icon
               onClick={changeLevel}
               style={{
@@ -179,14 +166,32 @@ function LogTable(props) {
         </Table.Row>
       </Table.Header>
 
-      <Table.Body>{tableRows}</Table.Body>
+      <Table.Body>
+        {Object.entries(retrieveUserPR()).map((exercise) => (
+          <TableRow
+            exerciseName={exercise[0]}
+            estimated1RM={exercise[1].estimated1RM}
+            tested1RM={exercise[1].tested1RM}
+            standard={{ estimated: calculateUserExerciseLevel(exercise[0], exercise[1].estimated1RM), tested: calculateUserExerciseLevel(exercise[0], exercise[1].tested1RM) }}
+          />
+        ))}
+      </Table.Body>
     </Table>
   );
 }
 
-function TableRow(props) {
+function TableRow({
+  exerciseName,
+  tested1RM,
+  estimated1RM,
+  standard,
+}: {
+  exerciseName: string;
+  tested1RM: number;
+  estimated1RM: number;
+  standard: { estimated: { level: string; color: string }; tested: { level: string; color: string } };
+}): ReactElement {
   const standardType = useContext(StandardTypeContext);
-  const { exerciseName, tested1RM, estimated1RM, standard } = props;
 
   return (
     <Table.Row>
@@ -198,7 +203,11 @@ function TableRow(props) {
       <Table.Cell textAlign="center">{tested1RM}</Table.Cell>
       <Table.Cell textAlign="center">{estimated1RM}</Table.Cell>
       <Table.Cell textAlign="center">
-        {standardType.type === 'Estimated Level' ? <h1 style={{ color: standard[0][1] }}>{standard[0][0]}</h1> : <h1 style={{ color: standard[1][1] }}>{standard[1][0]}</h1>}
+        {standardType.value === 'Estimated Level' ? (
+          <h1 style={{ color: standard.estimated.color }}>{standard.estimated.level}</h1>
+        ) : (
+          <h1 style={{ color: standard.tested.color }}>{standard.tested.level}</h1>
+        )}
       </Table.Cell>
     </Table.Row>
   );

@@ -5,41 +5,61 @@ import moment from 'moment';
 import { Button, Dropdown, Header, Table, Icon } from 'semantic-ui-react';
 import { NumericOnlyInput } from './components';
 import { LogStatsContext, ClickedDayContext } from './Context';
-import { addExerciseToDatabase, retrieveExerciseDatabase, addLogToDatabase, retrieveLogDatabase, removeLogFromDatabase } from './Database';
+import { createExercise, retrieveExercise, addLog, retrieveLog, removeLog } from './Database';
 import './index.css';
 
 function Logs(): ReactElement {
   const clickedDay = useContext(ClickedDayContext);
-  const [currentTab, setcurrentTab] = useState(<div />);
+  const [currentTab, setCurrentTab] = useState<string>('');
 
   function handleClickDay(date: Date) {
     clickedDay.setDate(moment(date));
-    setcurrentTab(<div />);
+    setCurrentTab('');
   }
 
-  function changeDayBackgroundIfHasLog(date: Date, view: string): string | null {
-    const dayHasLog = Object.prototype.hasOwnProperty.call(retrieveLogDatabase(), moment(date).format('DD MM YYYY'));
-    return view === 'month' && dayHasLog ? 'dayWithLog' : null;
+  function changeDayBackgroundIfHasLog(date: Date, view: string): string {
+    const dayHasLog = Object.prototype.hasOwnProperty.call(retrieveLog(), moment(date).format('DD MM YYYY'));
+    return view === 'month' && dayHasLog ? 'dayWithLog' : '';
   }
 
-  function changeDayBackgroundIfFuture(date: string, view: string): string | null {
+  function changeDayBackgroundIfFuture(date: Date, view: string): string {
     const isInFuture = moment().isBefore(date);
-    return view === 'month' && isInFuture ? 'dayInFuture' : null;
+    return view === 'month' && isInFuture ? 'dayInFuture' : '';
+  }
+
+  function renderTab(tabName: string): ReactElement {
+    let screen;
+    switch (tabName) {
+      case 'create':
+        screen = <LogScreenCreate />;
+        break;
+      case 'remove':
+        screen = <LogScreenRemove />;
+        break;
+      case 'view':
+        screen = <LogScreenView />;
+        break;
+      default:
+        break;
+    }
+    return screen;
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <Calendar onClickDay={handleClickDay} tileClassName={({ date, view }) => [changeDayBackgroundIfHasLog(date, view), changeDayBackgroundIfFuture(date, view)]} />
-      <LogScreenButtons currentScreen={setcurrentTab} />
-      {currentTab}
+      <Calendar
+        onClickDay={handleClickDay}
+        tileClassName={({ date, view }: { date: Date; view: string }) => [changeDayBackgroundIfHasLog(date, view), changeDayBackgroundIfFuture(date, view)]}
+      />
+      <LogScreenButtons onClick={(tabName: string) => setCurrentTab(tabName)} />
+      {renderTab(currentTab)}
     </div>
   );
 }
 
-function LogScreenButtons(props: { currentScreen: React.Dispatch<React.SetStateAction<JSX.Element>> }): ReactElement {
-  const { currentScreen } = props;
+function LogScreenButtons({ onClick }: { onClick: (string) => void }): ReactElement {
   const clickedDay = useContext(ClickedDayContext);
-  const dayHasLog = Object.prototype.hasOwnProperty.call(retrieveLogDatabase(), moment(clickedDay.date).format('DD MM YYYY'));
+  const dayHasLog = Object.prototype.hasOwnProperty.call(retrieveLog(), moment(clickedDay.date).format('DD MM YYYY'));
   const isInFuture = moment(clickedDay.date).isAfter();
 
   if (isInFuture) {
@@ -47,13 +67,13 @@ function LogScreenButtons(props: { currentScreen: React.Dispatch<React.SetStateA
   }
   return (
     <div className="logScreenButtons">
-      <Button className="logScreenButton" onClick={() => currentScreen(<LogScreenCreate />)} style={{ display: dayHasLog ? 'none' : 'block' }}>
+      <Button className="logScreenButton" onClick={() => onClick('create')} style={{ display: dayHasLog ? 'none' : 'block' }}>
         Create Log
       </Button>
-      <Button className="logScreenButton" onClick={() => currentScreen(<LogScreenRemove />)} style={{ display: dayHasLog ? 'block' : 'none' }}>
+      <Button className="logScreenButton" onClick={() => onClick('remove')} style={{ display: dayHasLog ? 'block' : 'none' }}>
         Remove Log
       </Button>
-      <Button className="logScreenButton" onClick={() => currentScreen(<LogScreenView />)} style={{ display: dayHasLog ? 'block' : 'none' }}>
+      <Button className="logScreenButton" onClick={() => onClick('view')} style={{ display: dayHasLog ? 'block' : 'none' }}>
         View log
       </Button>
     </div>
@@ -118,7 +138,7 @@ function LogScreenCreate(): ReactElement {
     } else if (!allInputsNumber) {
       setWarningMessage(<h2 style={{ color: 'red' }}>Only numeric inputs that are greater than zero are allowed.</h2>);
     } else {
-      addLogToDatabase(log.stats, moment(clickedDay.date).format('DD MM YYYY'));
+      addLog(log.stats, moment(clickedDay.date).format('DD MM YYYY'));
       log.setStats([]);
       setIsDisplayed('none');
     }
@@ -148,8 +168,8 @@ function LogScreenCreate(): ReactElement {
         placeholder="Select Exercise"
         search
         selection
-        options={retrieveExerciseDatabase()}
-        onAddItem={(_, event) => addExerciseToDatabase(event.value as string)}
+        options={retrieveExercise()}
+        onAddItem={(_, event) => createExercise(event.value as string)}
         onChange={(_, text) => handleChange(text.value as string)}
       />
       <br />
@@ -166,7 +186,7 @@ function LogScreenCreate(): ReactElement {
 
 function LogScreenView(): ReactElement {
   const clickedDay = useContext(ClickedDayContext);
-  const exerciseLog = retrieveLogDatabase()[moment(clickedDay.date).format('DD MM YYYY')];
+  const exerciseLog = retrieveLog()[moment(clickedDay.date).format('DD MM YYYY')];
 
   const exerciseRows: any[] = [];
   for (let i = 0; i < exerciseLog.length; i++) {
@@ -186,7 +206,7 @@ function LogScreenRemove(): ReactElement {
   const clickedDay = useContext(ClickedDayContext);
 
   function removeLogAndDiv() {
-    removeLogFromDatabase(moment(clickedDay.date).format('DD MM YYYY'));
+    removeLog(moment(clickedDay.date).format('DD MM YYYY'));
     setIsDisplayed('none');
   }
 

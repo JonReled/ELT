@@ -1,7 +1,7 @@
 import React, { useState, ReactElement } from 'react';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { Dropdown } from 'semantic-ui-react';
-import { retrieveLogDatabase } from './Database';
+import { retrieveLog } from './Database';
 
 const ExerciseDropdown = [
   {
@@ -34,7 +34,7 @@ export function kemmlerEquation(weight: number, reps: number): number {
 }
 
 function createCharts(exerciseName: string): Array<[string, { estimated: number; tested: number }]> {
-  const LogDatabase = Object.entries(retrieveLogDatabase());
+  const LogDatabase = Object.entries(retrieveLog());
   const dailyPRs: Array<[string, { estimated: number; tested: number }]> = [];
 
   for (let i = 0; i < LogDatabase.length; i++) {

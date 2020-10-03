@@ -21,17 +21,6 @@ function Programs(): ReactElement {
   const [viewedName, setViewedName] = useState<string>('');
   const [editing, setEditing] = useState<boolean>(false);
   const [database] = useState<Array<ProgramNoMethods>>(retrievePrograms());
-  const [rows] = useState<Array<ReactElement>>(() => {
-    const temp: Array<ReactElement> = [];
-    for (let i = 0; i < database.length; i++) {
-      temp.push(
-        <Grid.Row>
-          <Row {...database[i]} setViewedName={setViewedName} />
-        </Grid.Row>,
-      );
-    }
-    return temp;
-  });
 
   if (editing) {
     return <Edit {...(database.find((el) => el.name === viewedName) as ProgramNoMethods)} setEditing={setEditing} />;
@@ -39,7 +28,15 @@ function Programs(): ReactElement {
   if (viewedName) {
     return <View {...(retrievePrograms().find((el) => el.name === viewedName) as ProgramNoMethods)} setViewedName={setViewedName} setEditing={setEditing} />;
   }
-  return <Grid divided="vertically">{rows}</Grid>;
+  return (
+    <Grid divided="vertically">
+      {database.map((item) => (
+        <Grid.Row>
+          <Row {...item} setViewedName={setViewedName} />
+        </Grid.Row>
+      ))}
+    </Grid>
+  );
 }
 
 function Row({ name, author, level, days, setViewedName }: Omit<Program, 'setEditing'>): ReactElement {
@@ -62,16 +59,7 @@ function Row({ name, author, level, days, setViewedName }: Omit<Program, 'setEdi
 }
 
 function View({ name, author, level, days, program, notes, setEditing, setViewedName }: Program): ReactElement {
-  const [tableDays, setTableDays] = useState<any[]>([]);
   const [chooseScreenDisplayed, setChooseScreenDisplayed] = useState('none');
-  const tempDays: Array<ReactElement> = [];
-
-  useEffect(() => {
-    for (let i = 0; i < program.length; i++) {
-      tempDays.push(<ProgramTable day={program[i]} index={i} />);
-    }
-    setTableDays(tempDays);
-  }, [program]);
 
   function updateProgram(willUpdate: boolean) {
     setChooseScreenDisplayed('none');
@@ -113,7 +101,11 @@ function View({ name, author, level, days, program, notes, setEditing, setViewed
         }}
       >
         <h3 style={{ width: '30%' }}>{notes}</h3>
-        <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '1rem' }}>{tableDays}</div>
+        <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '1rem' }}>
+          {program.map((el, i) => (
+            <ProgramTable day={el} index={i} />
+          ))}
+        </div>
       </div>
       <div>
         <Button style={{ width: '100px', marginRight: '2px' }} onClick={() => setEditing(true)}>
@@ -129,16 +121,6 @@ function View({ name, author, level, days, program, notes, setEditing, setViewed
 }
 
 function ProgramTable({ day, index }): ReactElement {
-  const [rows, setRows] = useState<any[]>([]);
-  const tempRows: Array<ReactElement> = [];
-
-  useEffect(() => {
-    for (let i = 0; i < day.length; i++) {
-      tempRows.push(<TableRow {...day[i]} />);
-    }
-    setRows(tempRows);
-  }, []);
-
   return (
     <div style={{ marginRight: '2px' }}>
       <h1>Day {index + 1}</h1>
@@ -151,7 +133,11 @@ function ProgramTable({ day, index }): ReactElement {
           </Table.Row>
         </Table.Header>
 
-        <Table.Body>{rows}</Table.Body>
+        <Table.Body>
+          {day.map((el) => (
+            <TableRow {...el} />
+          ))}
+        </Table.Body>
       </Table>
     </div>
   );
@@ -196,15 +182,9 @@ function ConfirmChange({ updateProgram, isDisplayed }): ReactElement {
 }
 
 function Edit({ name, author, level, days, program, notes, setEditing }: Omit<Program, 'setViewedName'>): ReactElement {
-  const [tableDays, setTableDays] = useState<any[]>([]);
   const newProgram = useContext(NewProgramContext);
-  const tempDays: Array<ReactElement> = [];
 
   useEffect(() => {
-    for (let i = 0; i < program.length; i++) {
-      tempDays.push(<EditDay day={program[i]} dayIndex={i} />);
-    }
-    setTableDays(tempDays);
     newProgram.setProgram(program);
   }, [program]);
 
@@ -247,7 +227,11 @@ function Edit({ name, author, level, days, program, notes, setEditing }: Omit<Pr
         }}
       >
         <h3 style={{ width: '30%' }}>{notes}</h3>
-        <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '1rem' }}>{tableDays}</div>
+        <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '1rem' }}>
+          {program.map((el, i) => (
+            <EditDay day={el} dayIndex={i} />
+          ))}
+        </div>
       </div>
       <Button primary onClick={confirmEdit}>
         Confirm
@@ -257,16 +241,6 @@ function Edit({ name, author, level, days, program, notes, setEditing }: Omit<Pr
 }
 
 function EditDay({ day, dayIndex }): ReactElement {
-  const [rows, setRows] = useState<any[]>([]);
-  const tempRows: Array<ReactElement> = [];
-
-  useEffect(() => {
-    for (let i = 0; i < day.length; i++) {
-      tempRows.push(<EditRow {...day[i]} dayIndex={dayIndex} exerciseIndex={i} />);
-    }
-    setRows(tempRows);
-  }, []);
-
   return (
     <div style={{ marginRight: '2px' }}>
       <h1>Day {dayIndex + 1}</h1>
@@ -279,7 +253,11 @@ function EditDay({ day, dayIndex }): ReactElement {
           </Table.Row>
         </Table.Header>
 
-        <Table.Body>{rows}</Table.Body>
+        <Table.Body>
+          {day.map((el, i) => (
+            <EditRow {...el} dayIndex={dayIndex} exerciseIndex={i} />
+          ))}
+        </Table.Body>
       </Table>
     </div>
   );
