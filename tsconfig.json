@@ -2,7 +2,7 @@
   "compilerOptions": {
     "sourceMap": true,
     "target": "es5",
-    "jsx": "react",
+    "jsx": "react-jsx",
     "module": "esnext",
     "moduleResolution": "node",
     "experimentalDecorators": true,
@@ -25,19 +25,21 @@
     "esModuleInterop": true,
     "noImplicitAny": false,
     "downlevelIteration": true,
-    "plugins": [
-    ],
+    "plugins": [],
     "allowJs": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "noEmit": true
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true
   },
   "exclude": [
     "build",
     "node_modules"
   ],
   "include": [
-    "src"
+    "src",
+    "server/server.tsx",
+    "server/server.js"
   ]
 }

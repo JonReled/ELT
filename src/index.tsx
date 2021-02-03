@@ -2,25 +2,25 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import './semantic/dist/semantic.css';
-import TabExampleSecondaryPointing from './App';
+import Website from './App';
 import * as serviceWorker from './serviceWorker';
-import { LogStatsContext, ClickedDayContext, StandardTypeContext, NewProgramContext } from './Context';
+import { LogStatsContext, StandardTypeContext, NewProgramContext, WeightUnitContext } from './Context';
 
 function App() {
   const [stats, setStats] = useState([]);
-  const [date, setDate] = useState(new Date());
   const [value, set] = useState('Estimated Level');
   const [program, setProgram] = useState([]);
+  const [weightUnit, setWeightUnit] = useState<string>('kg');
 
   return (
     <LogStatsContext.Provider value={{ stats, setStats }}>
-      <ClickedDayContext.Provider value={{ date, setDate }}>
-        <StandardTypeContext.Provider value={{ value, set }}>
-          <NewProgramContext.Provider value={{ program, setProgram }}>
-            <TabExampleSecondaryPointing />
-          </NewProgramContext.Provider>
-        </StandardTypeContext.Provider>
-      </ClickedDayContext.Provider>
+      <StandardTypeContext.Provider value={{ value, set }}>
+        <NewProgramContext.Provider value={{ program, setProgram }}>
+          <WeightUnitContext.Provider value={{ weightUnit, setWeightUnit }}>
+            <Website />
+          </WeightUnitContext.Provider>
+        </NewProgramContext.Provider>
+      </StandardTypeContext.Provider>
     </LogStatsContext.Provider>
   );
 }

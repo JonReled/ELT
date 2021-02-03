@@ -23,18 +23,6 @@ code {
   padding: 5px;
 }
 
-.logScreenButtons {
-  padding: 1em 1em 0 1em;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-.logScreenButton {
-  text-align: center;
-  font-size: 1.5rem !important;
-}
-
 .dayWithLog {
   background-color: #42b0f5 !important;
   border-radius: 45px !important;
@@ -47,4 +35,14 @@ code {
 .react-calendar {
   width: 80% !important;
   font-size: 1.5rem;
+}
+
+/* Adds text to the button inside a sliding checkbox */
+
+#topbar .ui.toggle.checkbox input:checked ~ label[for="weight"]::after {
+  content: "kg";
+}
+
+#topbar .ui.toggle.checkbox input ~ label[for="weight"]::after {
+  content: "lb";
 }

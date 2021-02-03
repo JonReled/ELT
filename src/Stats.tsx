@@ -1,15 +1,9 @@
-import React, { useContext, ReactElement } from 'react';
-import { Header, Table, Button, Icon } from 'semantic-ui-react';
-import { retrieveLog, retrieveUserPR, updateUserPR } from './Database';
-import { StandardTypeContext } from './Context';
-import Chart, { kemmlerEquation } from './Chart';
-
-const defaultUserPRs = {
-  Bench: { tested1RM: 0, estimated1RM: 0 },
-  Deadlift: { tested1RM: 0, estimated1RM: 0 },
-  Squat: { tested1RM: 0, estimated1RM: 0 },
-  Total: { tested1RM: 0, estimated1RM: 0 },
-};
+import Chart from 'Chart';
+import { StandardTypeContext } from 'Context';
+import { getMaxes, localGetUserPR } from 'Database';
+import React, { ReactElement, useContext, useState } from 'react';
+import { Button, Table, Icon, Header, Message } from 'semantic-ui-react';
+import { Maxes } from 'types';
 
 function calculateUserWorldRecord(bw: number, gender: 'male' | 'female', exerciseName: string): number {
   const ratiosToTotal = {
@@ -67,8 +61,8 @@ function calculateUserWorldRecord(bw: number, gender: 'male' | 'female', exercis
   return Math.round((1.005 * bw + 610.6) * ratiosToTotal[exerciseName]);
 }
 
-function calculateUserExerciseLevel(exerciseName, user1RM) {
-  const worldRecord = calculateUserWorldRecord(122, 'male', exerciseName);
+function calculateUserExerciseLevel(exerciseName, user1RM, bw) {
+  const worldRecord = calculateUserWorldRecord(bw, 'male', exerciseName);
   if (user1RM > worldRecord * 0.95) {
     return { level: 'recordBreaker', color: 'black' };
   }
@@ -85,49 +79,30 @@ function calculateUserExerciseLevel(exerciseName, user1RM) {
     return { level: 'intermediate', color: 'orange' };
   }
   if (user1RM > worldRecord * 0.35) {
-    return { level: 'beginner', color: 'green' };
+    return { level: 'amateur', color: 'green' };
   }
   if (user1RM > worldRecord * 0.2) {
-    return { level: 'average', color: 'teal' };
+    return { level: 'beginner', color: 'teal' };
   }
   return { level: 'untrained', color: 'gray' };
 }
 
 function Stats(): ReactElement {
+  const [error, setError] = useState<string>('');
+  const [tableData, setTableData] = useState<Maxes>(localGetUserPR());
+
   function calculateOneRM() {
-    const LogDatabase = Object.values(retrieveLog());
-    localStorage.setItem('userPRs', JSON.stringify(defaultUserPRs));
-
-    for (let i = 0; i < LogDatabase.length; i++) {
-      const Log = LogDatabase[i];
-
-      for (let j = 0; j < Object.keys(Log).length; j++) {
-        const exercise = Log[j];
-
-        if (!['Bench', 'Squat', 'Deadlift'].includes(exercise.exerciseName)) {
-          break;
-        }
-        const currentEstimatedPR = retrieveUserPR()[exercise.exerciseName].estimated1RM;
-        const currentTestedPR = retrieveUserPR()[exercise.exerciseName].tested1RM;
-
-        if (kemmlerEquation(exercise.Weight, exercise.Reps) > currentEstimatedPR) {
-          const estimated1RM = Math.floor(kemmlerEquation(exercise.Weight, exercise.Reps));
-          updateUserPR(exercise.exerciseName, estimated1RM, 'estimated1RM');
-        }
-
-        if (exercise.Weight > currentTestedPR) {
-          updateUserPR(exercise.exerciseName, exercise.Weight, 'tested1RM');
-        }
-      }
-
-      updateUserPR('Total', retrieveUserPR().Bench.estimated1RM + retrieveUserPR().Squat.estimated1RM + retrieveUserPR().Deadlift.estimated1RM, 'estimated1RM');
-      updateUserPR('Total', retrieveUserPR().Bench.tested1RM + retrieveUserPR().Squat.tested1RM + retrieveUserPR().Deadlift.tested1RM, 'tested1RM');
-    }
+    getMaxes()
+      .then((res) => setTableData(res))
+      .catch(() => {
+        setError('An error has occurred, please try again later.');
+      });
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <LogTable />
+      <LogTable {...tableData} />
+      <Message negative style={{ display: error ? 'block' : 'none' }} header={error} />
       <Button style={{ margin: '0' }} onClick={calculateOneRM}>
         Calculate 1RM
       </Button>
@@ -136,7 +111,7 @@ function Stats(): ReactElement {
   );
 }
 
-function LogTable(): ReactElement {
+function LogTable(tableData: Maxes): ReactElement {
   const standardType = useContext(StandardTypeContext);
 
   function changeLevel(): void {
@@ -167,12 +142,16 @@ function LogTable(): ReactElement {
       </Table.Header>
 
       <Table.Body>
-        {Object.entries(retrieveUserPR()).map((exercise) => (
+        {Object.keys(tableData).map((name) => (
           <TableRow
-            exerciseName={exercise[0]}
-            estimated1RM={exercise[1].estimated1RM}
-            tested1RM={exercise[1].tested1RM}
-            standard={{ estimated: calculateUserExerciseLevel(exercise[0], exercise[1].estimated1RM), tested: calculateUserExerciseLevel(exercise[0], exercise[1].tested1RM) }}
+            key={name}
+            exerciseName={name}
+            estimated1RM={tableData[name].estimated}
+            tested1RM={tableData[name].tested}
+            standard={{
+              estimated: calculateUserExerciseLevel(name, tableData[name].estimated, tableData[name].bw),
+              tested: calculateUserExerciseLevel(name, tableData[name].tested, tableData[name].bw),
+            }}
           />
         ))}
       </Table.Body>

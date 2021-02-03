@@ -1,18 +1,13 @@
 import React from 'react';
 
 interface LogStatsContextProps {
-  stats: any[];
+  stats: any;
   setStats: React.Dispatch<React.SetStateAction<any>>;
-}
-
-interface ClickedDayContextProps {
-  date: Date;
-  setDate: React.Dispatch<React.SetStateAction<any>>;
 }
 
 interface StandardTypeContextProps {
   value: string;
-  set: React.Dispatch<React.SetStateAction<any>>;
+  set: React.Dispatch<React.SetStateAction<string>>;
 }
 
 interface NewProgramContextProps {
@@ -20,14 +15,14 @@ interface NewProgramContextProps {
   setProgram: React.Dispatch<React.SetStateAction<any>>;
 }
 
+interface WeightUnitContextProps {
+  weightUnit: string;
+  setWeightUnit: React.Dispatch<React.SetStateAction<string>>;
+}
+
 export const LogStatsContext = React.createContext<LogStatsContextProps>({
   stats: [],
   setStats: () => null,
-});
-
-export const ClickedDayContext = React.createContext<ClickedDayContextProps>({
-  date: new Date(),
-  setDate: () => null,
 });
 
 export const StandardTypeContext = React.createContext<StandardTypeContextProps>({
@@ -38,4 +33,9 @@ export const StandardTypeContext = React.createContext<StandardTypeContextProps>
 export const NewProgramContext = React.createContext<NewProgramContextProps>({
   program: [],
   setProgram: () => null,
+});
+
+export const WeightUnitContext = React.createContext<WeightUnitContextProps>({
+  weightUnit: 'kg',
+  setWeightUnit: () => null,
 });

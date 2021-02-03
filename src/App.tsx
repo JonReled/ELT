@@ -1,11 +1,15 @@
-import React, { ReactElement } from 'react';
-import './App.css';
-import { Tab } from 'semantic-ui-react';
-import { BrowserRouter, Switch, NavLink, Route } from 'react-router-dom';
+import React, { ReactElement, useContext, useEffect, useState } from 'react';
+import { Tab, Menu, Checkbox } from 'semantic-ui-react';
+import { BrowserRouter, Switch, NavLink, Route, Redirect } from 'react-router-dom';
+import Register from 'Register';
+import { checkAuth, getLogout } from 'Database';
+import ErrorPage from 'ErrorPage';
 import Stats from './Stats';
-import Settings from './Settings';
 import Logs from './Logs';
 import Programs from './Programs';
+import Login from './Login';
+import { WeightUnitContext } from './Context';
+import './index.css';
 
 const panes = [
   {
@@ -14,13 +18,12 @@ const panes = [
       id: 'Stats',
       content: 'Stats',
       to: '/stats',
-      exact: true,
       key: 'stats',
     },
     pane: (
       <Route
+        key="stats"
         path="/stats"
-        exact
         render={() => (
           <Tab.Pane attached={false}>
             <Stats />
@@ -36,13 +39,12 @@ const panes = [
       id: 'Logs',
       content: 'Logs',
       to: '/logs',
-      exact: true,
       key: 'Logs',
     },
     pane: (
       <Route
+        key="logs"
         path="/logs"
-        exact
         render={() => (
           <Tab.Pane attached={false}>
             <Logs />
@@ -55,38 +57,15 @@ const panes = [
   {
     menuItem: {
       as: NavLink,
-      id: 'Settings',
-      content: 'Settings',
-      to: '/settings',
-      exact: true,
-      key: 'Settings',
-    },
-    pane: (
-      <Route
-        path="/settings"
-        exact
-        render={() => (
-          <Tab.Pane attached={false}>
-            <Settings />
-          </Tab.Pane>
-        )}
-      />
-    ),
-  },
-
-  {
-    menuItem: {
-      as: NavLink,
       id: 'Programs',
       content: 'Programs',
       to: '/programs',
-      exact: true,
       key: 'Programs',
     },
     pane: (
       <Route
+        key="programs"
         path="/programs"
-        exact
         render={() => (
           <Tab.Pane attached={false}>
             <Programs />
@@ -97,16 +76,60 @@ const panes = [
   },
 ];
 
-function TabExampleSecondaryPointing(): ReactElement {
+function TopMenu(): ReactElement {
+  const weightUnit = useContext(WeightUnitContext);
+
+  return (
+    <Menu id="topbar" style={{ zIndex: 1, width: '100vw', position: 'fixed', top: 0, left: 0, margin: 0 }}>
+      <Menu.Item onClick={getLogout}>Sign Out</Menu.Item>
+      <Menu.Item>
+        <Checkbox
+          toggle
+          onChange={(event, data) => {
+            weightUnit.setWeightUnit(data.checked ? 'kg' : 'lb');
+          }}
+          defaultChecked={weightUnit.weightUnit === 'kg'}
+          id="weight"
+        />
+      </Menu.Item>
+    </Menu>
+  );
+}
+
+function Website(): ReactElement {
+  const [auth, setAuth] = useState<boolean>(false);
+
+  useEffect(() => {
+    checkAuth().then((res) => setAuth(res));
+  }, []);
+
   return (
     <BrowserRouter>
-      <div>
-        <Switch>
-          <Tab renderActiveOnly={false} activeIndex={-1} menu={{ secondary: true, pointing: true }} panes={panes} />
-        </Switch>
-      </div>
+      <TopMenu />
+      <Switch>
+        {auth ? (
+          <>
+            <Tab renderActiveOnly={false} activeIndex={-1} menu={{ secondary: true, pointing: true }} panes={panes} />
+          </>
+        ) : (
+          <>
+            <Route path="/register">
+              <Register />
+            </Route>
+            <Route path="/login">
+              <Login />
+            </Route>
+            <Route path="/">
+              <Redirect to="/login" />
+            </Route>
+          </>
+        )}
+        <Route path="/error">
+          <ErrorPage />
+        </Route>
+      </Switch>
     </BrowserRouter>
   );
 }
 
-export default TabExampleSecondaryPointing;
+export default Website;

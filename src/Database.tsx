@@ -1,3 +1,4 @@
+import { ExerciseForChart, Maxes, Exercise, LogInterface } from 'types';
 import { Program } from './Programs';
 
 const defaultExerciseDatabase = [
@@ -5,15 +6,10 @@ const defaultExerciseDatabase = [
   { value: 'Deadlift', text: 'Deadlift' },
   { value: 'Squat', text: 'Squat' },
 ];
+
 const defaultUserSettings = {
   weightUnit: 'kg',
   heightUnit: 'cm',
-};
-const defaultUserPRs = {
-  Bench: { tested1RM: 0, estimated1RM: 0 },
-  Deadlift: { tested1RM: 0, estimated1RM: 0 },
-  Squat: { tested1RM: 0, estimated1RM: 0 },
-  Total: { tested1RM: 0, estimated1RM: 0 },
 };
 
 const defaultPrograms = {
@@ -57,20 +53,242 @@ const defaultPrograms = {
   },
 };
 
-interface Exercise {
-  value: string;
-  text: string;
+export function kemmlerEquation(weight: number, reps: number): number {
+  // kemmler's equation for estimating 1rmaxes stops working after 24 reps so I'm making sure no errors occur.
+  if (reps > 24) {
+    return weight * (0.988 + 0.0104 * 24 + 0.0019 * 24 ** 2 - 0.0000584 * 24 ** 3);
+  }
+  if (reps < 0) {
+    return 0;
+  }
+  return weight * (0.988 + 0.0104 * reps + 0.0019 * reps ** 2 - 0.0000584 * reps ** 3);
 }
 
-interface ExerciseLogEntry {
-  exerciseName: string;
-  Sets: number;
-  Reps: number;
-  Weight: number;
+function fetchWrapped(url, func): any {
+  return fetch('http://93.108.171.191:9000/checkToken', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  })
+    .then((res) => {
+      if (res.ok) {
+        return fetch(url, func);
+      }
+      throw Error();
+    })
+    .catch((err) => {
+      window.location.reload();
+    });
+}
+
+export async function checkAuth(): Promise<boolean> {
+  const res = await fetch('http://93.108.171.191:9000/checkToken', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
+  return res.ok;
+}
+
+export async function postLogin(userData: { identification: string; password: string }): Promise<void> {
+  const res = await fetch('http://93.108.171.191:9000/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(userData),
+    credentials: 'include',
+  });
+  if (res.ok) {
+    window.location.reload();
+    return;
+  }
+  throw new Error(String(res.status));
+}
+
+export async function postRegister(userData: { username: string; email: string; password: string }): Promise<boolean> {
+  const res = await fetch('http://93.108.171.191:9000/register', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(userData),
+  });
+  if (res.ok) {
+    return true;
+  }
+  throw new Error(String(res.status));
+}
+
+export async function getLogout(): Promise<void> {
+  await fetch('http://93.108.171.191:9000/logout', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
+  window.location.reload();
+}
+
+export async function getLogsOfExercise(name: string): Promise<Array<ExerciseForChart>> {
+  const dailyPRs: Array<ExerciseForChart> = [];
+  try {
+    const res = await fetchWrapped(`http://93.108.171.191:9000/charts?name=${name}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+    if (res.ok) {
+      const logs: { ['date']: { weight: number; reps: number } } = JSON.parse(await res.text()).reduce((acc, cur) => {
+        if (acc[cur.date]) {
+          acc[cur.date].push({ weight: Number(cur.weight), reps: Number(cur.reps) });
+        } else {
+          acc[cur.date] = [{ weight: Number(cur.weight), reps: Number(cur.reps) }];
+        }
+        return acc;
+      }, {});
+
+      for (let i = 0; i < Object.keys(logs).length; i++) {
+        const date = Object.keys(logs)[i];
+        const currentPRs = {
+          estimated: 0,
+          tested: 0,
+        };
+
+        for (let j = 0; j < logs[date].length; j++) {
+          const estimated1RM = Math.floor(kemmlerEquation(logs[date][j].weight, logs[date][j].reps));
+
+          if (estimated1RM > currentPRs.estimated) {
+            currentPRs.estimated = estimated1RM;
+          }
+          if (logs[date][j].weight > currentPRs.tested) {
+            currentPRs.tested = logs[date][j].weight;
+          }
+        }
+
+        dailyPRs.push({ date, estimated: currentPRs.estimated, tested: currentPRs.tested });
+      }
+      return dailyPRs;
+    }
+    throw res.status;
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+export async function getMaxes(): Promise<Maxes> {
+  const res = await fetch(`http://93.108.171.191:9000/stats`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
+  try {
+    if (res.ok) {
+      const userPRs: Maxes = {
+        Squat: { estimated: 0, tested: 0, bw: 0 },
+        Bench: { estimated: 0, tested: 0, bw: 0 },
+        Deadlift: { estimated: 0, tested: 0, bw: 0 },
+        Total: { estimated: 0, tested: 0, bw: 0 },
+      };
+      const logs: Array<Omit<Exercise, 'estimated' | 'tested'>> = JSON.parse(await res.text());
+
+      for (let i = 0; i < logs.length; i++) {
+        const { name, weight, reps, bw } = logs[i];
+
+        const currentEstimatedPR = userPRs[name].estimated;
+        const currentTestedPR = userPRs[name].tested;
+
+        if (kemmlerEquation(weight, reps) > currentEstimatedPR) {
+          userPRs[name].bw = Math.max(bw, userPRs[name].bw);
+          userPRs[name].estimated = Math.floor(kemmlerEquation(weight, reps));
+        }
+
+        if (weight > currentTestedPR) {
+          userPRs[name].bw = Math.max(bw, userPRs[name].bw);
+          userPRs[name].tested = weight;
+        }
+      }
+
+      userPRs.Total.estimated = userPRs.Bench.estimated + userPRs.Squat.estimated + userPRs.Deadlift.estimated;
+      userPRs.Total.tested = userPRs.Bench.tested + userPRs.Squat.tested + userPRs.Deadlift.tested;
+      userPRs.Total.bw = Math.max(userPRs.Bench.bw, userPRs.Squat.bw, userPRs.Deadlift.bw);
+      localPostUserPR(userPRs);
+      return userPRs;
+    }
+    throw res.status;
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+export function localPostUserPR(userPRs: Maxes): void {
+  localStorage.setItem('userPRs', JSON.stringify(userPRs));
+}
+
+export function localGetUserPR(): Maxes {
+  return JSON.parse(localStorage.getItem('userPRs') as string);
+}
+
+export async function getDates(): Promise<Array<string>> {
+  const res = await fetch('http://93.108.171.191:9000/workout/dates', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
+  try {
+    if (res.ok) {
+      return JSON.parse(await res.text());
+    }
+    throw res.status;
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+export async function getWorkoutLog(date: string): Promise<LogInterface> {
+  const res = await fetch(`http://93.108.171.191:9000/workout/log?date=${date}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
+  try {
+    if (res.ok) {
+      const arr = JSON.parse(await res.text());
+
+      const obj: LogInterface = {
+        bw: arr[0].bw,
+        exercises: arr.reduce((acc, cur) => {
+          if (acc[cur.id]) {
+            acc[cur.id].sets.push({ weight: cur.weight, reps: cur.reps });
+          } else {
+            acc[cur.id] = { name: cur.name, sets: [{ weight: cur.weight, reps: cur.reps }] };
+          }
+          return acc;
+        }, {}),
+      };
+      return obj;
+    }
+    throw res.status;
+  } catch (err) {
+    throw new Error(err);
+  }
 }
 
 export function createExercise(exerciseName: string): void {
-  let currentDatabase: Array<Exercise>;
+  let currentDatabase: any;
   if (localStorage.getItem('exerciseDatabase') === null) {
     currentDatabase = defaultExerciseDatabase;
   } else {
@@ -81,42 +299,52 @@ export function createExercise(exerciseName: string): void {
   localStorage.setItem('exerciseDatabase', JSON.stringify(currentDatabase));
 }
 
-export function retrieveExercise(): Array<Exercise> {
+export function retrieveExercise(): Array<{ value: string; text: string }> {
   if (localStorage.getItem('exerciseDatabase') === null) {
     return defaultExerciseDatabase;
   }
   return JSON.parse(localStorage.getItem('exerciseDatabase') as string);
 }
 
-export function addLog(exerciseLog: Array<ExerciseLogEntry>, day: string): void {
-  let currentLog: { day: Array<ExerciseLogEntry> };
-  if (localStorage.getItem('logDatabase') === null) {
-    currentLog = { day: exerciseLog };
-  } else {
-    currentLog = JSON.parse(localStorage.getItem('logDatabase') as string);
-    currentLog[day] = exerciseLog;
-  }
-  localStorage.setItem('logDatabase', JSON.stringify(currentLog));
+export function addLog(exerciseLog: any, bw: number, date: string): void {
+  console.log(exerciseLog);
+  fetch('http://93.108.171.191:9000/workout', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ date, bw, exerciseLog }),
+    credentials: 'include',
+  }).then((res) => console.log(res.status));
 }
 
-export function removeLog(day: string): void {
-  if (localStorage.getItem('logDatabase') === null) {
-    return;
-  }
-  const currentLog = JSON.parse(localStorage.getItem('logDatabase') as string);
-  delete currentLog[day];
-  localStorage.setItem('logDatabase', JSON.stringify(currentLog));
+export function removeLog(date: string): void {
+  fetchWrapped(`http://93.108.171.191:9000/workout?date=${date}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  }).then((res) => console.log(res.status));
 }
 
-export function retrieveLog(): { day: Array<ExerciseLogEntry> } {
-  let log: { day: Array<ExerciseLogEntry> };
-  if (localStorage.getItem('logDatabase') === null) {
-    log = { day: [] };
-  } else {
-    log = JSON.parse(localStorage.getItem('logDatabase') as string);
-  }
+export function getAllLogs(): any {
+  return 'a';
+}
 
-  return log;
+export function retrieveLog(date: string): any {
+  fetch(`http://93.108.171.191:9000/workout/log?date=${date}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  }).then((res) => {
+    if (res.status === 200) {
+      return res.text();
+    }
+    return 'error';
+  });
 }
 
 export function updateUserSettings(settingName: string, value: string): void {
@@ -138,24 +366,6 @@ export function retrieveUserSettings(settingName: string): string {
   }
 
   return returnedSetting;
-}
-
-export function retrieveUserPR(): { [k: string]: { tested1RM: number; estimated1RM: number } } {
-  if (localStorage.getItem('userPRs') === null) {
-    return defaultUserPRs;
-  }
-  return JSON.parse(localStorage.getItem('userPRs') as string);
-}
-
-export function updateUserPR(exerciseName: string, value: number, type: string): void {
-  let currentPRs: { [k: string]: { tested1RM: number; estimated1RM: number } };
-  if (localStorage.getItem('userPRs') === null) {
-    currentPRs = defaultUserPRs;
-  } else {
-    currentPRs = JSON.parse(localStorage.getItem('userPRs') as string);
-  }
-  currentPRs[exerciseName][type] = value;
-  localStorage.setItem('userPRs', JSON.stringify(currentPRs));
 }
 
 export function setUserProgram(program: Omit<Program, 'setViewedName' | 'setEditing'>): void {

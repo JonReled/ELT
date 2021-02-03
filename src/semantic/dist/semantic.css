@@ -71,7 +71,7 @@ html {
  */
 
 body {
-  margin: 0;
+  margin: 0px;
 }
 
 /**
@@ -456,7 +456,7 @@ html {
 
 body {
   margin: 0 auto;
-  padding: 0;
+  padding: 25px;
   overflow-x: hidden;
   min-width: 320px;
   max-width: 960px;
@@ -40252,7 +40252,7 @@ span.ui.massive.text {
 
 .ui.form .field {
   clear: both;
-  margin: 0 0 1em;
+  margin: 0 0 0;
 }
 
 .ui.form .fields .fields,
@@ -54414,7 +54414,7 @@ a.inverted.ui.card:hover,
 .ui.toggle.checkbox label:after {
   background: #FFFFFF linear-gradient(transparent, rgba(0, 0, 0, 0.05));
   position: absolute;
-  content: '' !important;
+  content: '';
   opacity: 1;
   z-index: 2;
   border: none;
@@ -62928,6 +62928,7 @@ body.pushable > .pusher {
 .ui.tab.active,
 .ui.tab.open {
   display: block;
+  box-shadow: 0 1px 2px 0 rgba(34, 36, 38, 0.15);
 }
 
 /*--------------------
